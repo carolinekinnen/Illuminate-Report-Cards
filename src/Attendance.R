@@ -2,9 +2,25 @@
 library('ProjectTemplate')
 load.project()
 
-source(here::here("munge", "attendance_munge.R"))
+# ------------------------ ### Combining Tables ###-------------------------------------
 
-#------------------------ ### Combining Tables ###-------------------------------------
+# combine attendance and attendance code tables
+attendance_complete <- attendance %>%
+  right_join(attendance_code %>% 
+               select(attendance_codeid = id,
+                      att_code),
+             by = "attendance_codeid")
+
+# combine membership with attendance complete table
+member_att <- membership  %>%
+  left_join(attendance_complete %>%
+              select(studentid,
+                     att_date,
+                     att_code
+                     #presence_status_cd
+              ),
+            by =c("studentid",
+                  "date" = "att_date"))
 
 # Identify whether att_code is enrolled, present, absent, or tardy for each student by day
 
@@ -48,7 +64,8 @@ attend_student <- member_att %>%
 
 attend_school_grade_student <- attend_student %>%
   filter(date <= rc_quarter_last_day) %>% 
-  fuzzy_left_join(terms %>% filter(str_detect(abbreviation, "Q")) %>% select(-id) %>% rename(quarter = abbreviation), 
+  fuzzy_left_join(terms %>% filter(str_detect(abbreviation, "Q")) %>% select(-id) %>% 
+                  dplyr::rename(quarter = abbreviation), 
                   by = c("date" = "firstday",
                          "date" = "lastday"),
                   match_fun = list(`>=`, `<=`)) %>%

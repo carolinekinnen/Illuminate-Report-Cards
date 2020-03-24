@@ -1,4 +1,128 @@
-helper.function <- function()
-{
-  return(1)
+
+# ----------------------- ### Identify Quarter Function ### -----------------
+
+identify_quarter <- function(date) {
+  case_when(
+    date >= terms$firstday[1] & date < terms$firstday[3] ~ "Q1",
+    date >= terms$firstday[3] & date < terms$firstday[4] ~ "Q2",
+    date >= terms$firstday[4] & date < terms$firstday[5] ~ "Q3",
+    date >= terms$firstday[5] & date <= terms$lastday[5] ~ "Q4",
+    TRUE ~ "not in SY")
+}
+
+
+# -----------------------### Read in Report Card Files from GCS Bucket Function ### -----------------
+
+get_objects_report_card <- function(school, grade) {
+  grade <- as.character(grade)
+  
+  file_name <- paste0("Illuminate-Report-Cards/Illuminate-Grades/", 
+                      sy_abbreviation, "/", school, "_", grade, ".csv")
+  file_save_to <- paste0("data/flatfiles/rc_export/", 
+                         school, "_", grade, ".csv") 
+  
+  gcs_get_object(file_name,
+                 saveToDisk = file_save_to,
+                 overwrite = TRUE)
+}
+
+get_objects_roster_links <- function(school) {
+  file_name <- paste0("Illuminate-Report-Cards/DL_roster_links/",
+                      sy_abbreviation, "_roster_links_", school, ".csv")
+  file_save_to <- paste0("data/flatfiles/DL_roster_links/",
+                         sy_abbreviation, "_roster_links_", school, ".csv")
+  
+  gcs_get_object(file_name,
+                 saveToDisk = file_save_to,
+                 overwrite = TRUE)
+}
+
+# ----------------------- ### Read in DL Students from Google Sheets Function ### --------------------
+
+ws <- function(df_title, grade_level){
+  read_sheet(df_title$id,
+             sheet = grade_level) %>%
+    select(2) %>% 
+    janitor::clean_names()
+}
+
+# if ws isn't working check that id_number column in Google Sheet only contains integer values, not characters
+
+# ----------------------- ### Transform File into Grades Functions ### --------------------
+
+get_q_grades_pct <- function(data, grade_type = "grade", rc_quarter_input){
+  # data = the data we pass in
+  #grade_type should either be "grade" or "percent"
+  grade_type_eval <- sym(grade_type)
+  
+  data %>% 
+    select(site_id,
+           student_id,
+           contains(grade_type),
+           -contains("y1_avg")) %>%
+    tidyr::gather(rc_field, !!grade_type_eval, -site_id:-student_id) %>%
+    mutate(
+      # subject0 = gsub("(^.+th_)(\\w.+)(_.+)", "\\2", rc_field),
+      #      subject1 = gsub("q\\d_", "", subject0),
+      #      subject1 = gsub("_", " ", subject1),
+      #      subject3 = gsub("^(\\S*\\s+\\S+).*", "\\1", subject1),
+           subject = str_extract(rc_field, "choice_reading|guided_reading|behavior|math|reading|step|homework|science|musical_theater|writing|art|ela|pe|lit_centers|social_studies|explorations|dance|pre_algebra|algebra|physical_education"),
+           course_school = toupper(stringr::str_extract(rc_field, "kap|kop|kacp|kac|kbcp|kams|koa"))) %>%
+  #  tidyr::separate("subject3", c("sub1", "sub2"), sep = " ") %>%
+    mutate(#one_subj = sub1 == sub2,
+           # subject4 = if_else(one_subj, sub1, "null"),
+           # subject5 = if_else(is.na(one_subj), sub1, subject4),
+           # subject6 = if_else(grepl("null", subject5), paste(sub1, sub2, sep = " "), subject5),
+           # subject7 = gsub("koa ", "", subject6),
+           # subject8 = if_else(subject7 == "social", "social studies", subject7),
+           # subject = if_else(subject7 == "lit", "lit centers", subject8),
+      subject = case_when(
+        subject == "lit_centers" ~ "lit centers",
+        subject == "social_studies" ~ "social",
+        subject == "physical_education" ~ "pe",
+        TRUE ~ subject),
+      store_code = toupper(str_extract(rc_field, "q\\d"))) %>%
+    left_join(schools %>% dplyr::rename(site_id = schoolid), by = "site_id") %>%
+    filter(schoolabbreviation == course_school) %>%
+     select(-c(schoolname, schoolabbreviation, rc_field)) %>%  
+    #           subject0:sub2,
+    #           one_subj:subject8,
+    #           rc_field)) %>%
+    filter(!is.na(!!grade_type_eval)) %>%
+    filter(store_code == rc_quarter_input)
+}
+
+# Makes the final grade whatever is in the Quarter-Y1Avg Field in Illuminate export
+# necessary after final grades are calculated and uploaded once so GPA will reflect grade modifications
+
+get_yavg_grades <- function(data){
+  data %>% 
+    select(site_id,
+           student_id,
+           contains(tolower(rc_quarter)),
+           -contains("percent")) %>%
+    select(site_id, student_id, contains("y1_avg")) %>% 
+    tidyr::gather(rc_field, grade, -site_id:-student_id) %>% 
+    mutate(subject = str_extract(rc_field, "math|ela|social|science|art|music|reading|ss|lit_centers|dance|pre_algebra|algebra|pe"),    # have to add new subjects
+           course_school = toupper(stringr::str_extract(rc_field, "kacp|kac|kbcp|kams|koa"))) %>% 
+    select(-c(rc_field)) %>%
+    left_join(schools %>% dplyr::rename(site_id = schoolid), by = "site_id") %>% 
+    filter(course_school == schoolabbreviation) %>% 
+    filter(!is.na(grade)) %>%
+    mutate(subject = case_when(
+      subject == "social" ~ "social studies",
+      subject == "lit_centers" ~ "lit centers",
+      TRUE ~ subject
+    ))
+}
+
+
+# ----------------------- ### Transform File into GPAs Functions ### --------------------
+
+# Function to always round 0.5 up
+round2 <- function(x, digits = 0) {  
+  z <- abs(x) * 10^digits
+  z <- z + 0.5
+  z <- trunc(z)
+  z <- z / 10^digits
 }
