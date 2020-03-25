@@ -3,8 +3,14 @@ library(ProjectTemplate)
 load.project()
 
 source(here::here("src", "Attendance.R"))
+source(here::here("src", "category_comments.R"))
 source(here::here("src", "course_teacher_name.R"))
+source(here::here("src", "deanslist_upload.R"))
+source(here::here("src", "final_grades.R"))
+source(here::here("src", "KTC_data.R"))
+source(here::here("src", "powerschool_transcript_upload.R"))
 source(here::here("src", "quarter_number.R"))
+source(here::here("src", "retention_data.R"))
 
 
 # --------------------- ### Write Quarter Number Files for Illuminate ### ------------------
@@ -25,7 +31,7 @@ write.csv(quarter_number %>%
 middle_course_teacher <- course_names_teachers_final %>%
   mutate_all(funs(replace(., is.na(.), "")))
 
-middle_course_teacher_file <- sprintf(paste0("/19-20 Files/course_teacher/middle_course_teacher_name_",
+middle_course_teacher_file <- sprintf(paste0("output/19-20 Files/course_teacher/middle_course_teacher_name_",
                                              rc_quarter,
                                              "_%s.csv"),
                                       today())
@@ -37,7 +43,7 @@ write.csv(middle_course_teacher %>%
 
 # Primary
 
-primary_course_teacher_file_name <- sprintf(paste0("/19-20 Files/course_teacher/primary_course_teacher_name_",
+primary_course_teacher_file_name <- sprintf(paste0("output/19-20 Files/course_teacher/primary_course_teacher_name_",
                                               rc_quarter,
                                               "_%s.csv"),
                                        today())
