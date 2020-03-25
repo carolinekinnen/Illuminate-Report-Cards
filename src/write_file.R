@@ -152,15 +152,19 @@ write.csv(ps_upload_final %>%
           # file = here::here(ps_upload_file_name),
           row.names = FALSE)
 
+# 7. --------------------#### Write Category Comments #### -------------------------
+# Not writing yet because Maggie hasn't confirmed she's ok with plan
+# also need to figure out Spanish
 
-# 7. --------------------- ### Write File for KTC ### ------------------
+
+# 8. --------------------- ### Write File for KTC ### ------------------
 
 write.csv(ktc_7_request %>% as.data.frame(),
           #file = here::here(ktc_7_request.csv"),
           file = "~/Downloads/ktc_7_request.csv",
           row.names = FALSE)
 
-# 8. ------------------ ### Write File for Retention Data ### ---------
+# 9. ------------------ ### Write File for Retention Data ### ---------
 
 write_csv(failing_or_below15, 
           #file = here::here(failing_or_below15.csv"),
