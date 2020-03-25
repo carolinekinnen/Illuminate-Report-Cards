@@ -106,7 +106,7 @@ enrollment <- get_powerschool("ps_enrollment_all") %>%
 
 student_enroll <- enrollment %>% 
   left_join(students %>% 
-            dplyr::rename(studentid = id) %>% select(-schoolid),
+            rename(studentid = id) %>% select(-schoolid),
             by = "studentid") %>% 
   group_by(studentid) %>% 
   filter(entrydate == max(entrydate))
@@ -245,7 +245,7 @@ gradebooks <- get_illuminate("gradebooks", schema = "gradebook") %>%
          is_deleted,
          academic_year) %>%
   filter(active,
-         !is_deleted)
+         !is_deleted) %>%
   collect() 
 
 # get illuminate students
