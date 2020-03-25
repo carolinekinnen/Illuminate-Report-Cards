@@ -29,5 +29,5 @@ cumulative_gpa <- final_grades %>%
 # --------------------------------- ### Combine into One File ### -------------------------------
 
 final_grades_gpa_illuminate_upload <- final_percent_grades %>%
-  left_join(quarter_gpa, by = "student_number") %>%
-  left_join(cumulative_gpa, by = "student_number")
+  left_join(quarter_gpa, by = "student_id") %>%
+  left_join(cumulative_gpa, by = "student_id")

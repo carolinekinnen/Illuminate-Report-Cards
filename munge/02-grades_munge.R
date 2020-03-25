@@ -188,13 +188,13 @@ quarter_grades_pivot_wide <- quarter_grades %>%
          subject,
          grade, 
          percent) %>%
-  group_by(student_id, #store_code, 
-           subject) %>%
-  mutate(row = row_number()) %>%
-  pivot_wider(names_from = c(#store_code
-                             subject), 
-              values_from = c(grade, percent)) %>%
-  select(-row)
+  group_by(subject,
+          # student_id,
+           ) %>%
+ # mutate(row = row_number()) %>%
+  pivot_wider(names_from = c(subject), 
+              values_from = c(grade, percent)) #%>%
+  #select(-row)
 
 # ----------------------------- ### Year Average Percentage for Powerschool and Illuminate ### --------------
 
@@ -238,7 +238,10 @@ final_percents <- all_quarter_percents %>%
 
 if(calculated_type == "first_upload") {
   final_grades <- final_percents %>%
-    left_join(grade_percent_scale, by = "percent") %>%
+    mutate(percent = as.character(round(percent, 1))) %>%
+    left_join(grade_percent_scale %>% 
+                mutate(percent = as.character(percent)),
+              by = "percent") %>%
     select(-percent)
 } else {
   final_grades <- grade_df_list_rm_prim %>% 

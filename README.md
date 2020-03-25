@@ -28,8 +28,8 @@ This project contains a collection of scripts that will generate final grades an
     |                                  ProjectTemplate. List required libraries
     |                                  and scripts during `load.project()`.
     ├── data                        
-    │   ├── 01-bq_files.R           <- Load files from Big Query Database
-    │   ├── 02-manual_tables.R      <- Load manual tables
+    │   ├── 01-manual_tables.R      <- Load manual tables
+    │   ├── 02-bq_files.R           <- Load files from Big Query Database
     │   ├── 03-flat_files.R         <- Loads flat files from Google Cloud Storage (GCS)
     │   ├── flatfiles               <- Contains flatfiles downloaded from GCS
     │   ├── 04-manual_kinder_co     <- Contains a manual table of co-teachers that needs to be updated yearly or upon request by schools
@@ -38,6 +38,7 @@ This project contains a collection of scripts that will generate final grades an
     ├── munge
     |   ├── 01-course_names_munge.R   <- Clean and format data pertaining to course and teacher names
     |   ├── 02-grades_munge.R         <- Clean and format data pertaining to grades and GPA
+    |   |── 03-attendance_munge.R     <- Clean and format data pertaining to attendance
     |   └── README.md
     |
     ├── src

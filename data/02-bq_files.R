@@ -198,7 +198,24 @@ map_winter_pivot_students <- map_winter_pivot %>%
             dplyr::rename(student_id = student_number), by = "student_id") %>%
   left_join(schools %>% select(-schoolname), by = "schoolid")
 
-# ------------------------ ### Unique Schools/Grade Tables for Reading Files ### ----------------------
+# ----------------------- ### Illuminate Primary Gradebook tables for Retention data ### ----------------
+# Need to pull from Illuminate gradebooks instead of report cards because report cards don't have grades in A/B/C/D scale
+
+# Quarter grades for K-2 students
+q_grades_primary <- get_illuminate("overall_score_cache", schema = "gradebook") %>%
+  filter(timeframe_start_date >= rc_quarter_first_day,
+         timeframe_end_date <= rc_quarter_last_day) %>%
+  select(gradebook_id,
+         calculated_at,
+         mark,
+         percentage,
+         student_id,
+         timeframe_end_date,
+         timeframe_start_date) %>%
+  collect(n= Inf)
+
+
+# ------------------------ ### Unique Schools/Grade Tables for Reading in Files ### ----------------------
 
 # Unique list of schools and grade levels of currently enrolled students in students table
 schools_grades <- students %>%

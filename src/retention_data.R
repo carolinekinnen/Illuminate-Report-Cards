@@ -42,20 +42,7 @@ failing_or_below15_middle <- below15_and_grades_middle %>%
 
 
 # ----------------------------- ##### Primary gradebook grades ##### ---------------------------
-# done by gradebook instead of report card export because Illuminate doesn't store primary grades that way
-
-# Quarter grades for K-2 students
-q_grades_primary <- get_illuminate("overall_score_cache", schema = "gradebook") %>%
-  filter(timeframe_start_date >= rc_quarter_first_day,
-         timeframe_end_date <= rc_quarter_last_day) %>%
-  select(gradebook_id,
-         calculated_at,
-         mark,
-         percentage,
-         student_id,
-         timeframe_end_date,
-         timeframe_start_date) %>%
-  collect(n= Inf)
+# done by gradebook instead of report card export because Illuminate doesn't store primary grades in same way
 
 # Only need math and reading for retention tracker
 q_grades_primary_math_reading <- q_grades_primary %>%
@@ -133,8 +120,8 @@ q_grades_primary_math_reading <- q_grades_primary %>%
 
 failing_and_map_primary <- q_grades_primary_math_reading %>%
   filter(math < 60 | ela < 60) %>%
-  left_join(map_winter %>%
-              filter(grade_level < 3), by = "student_id")
+  left_join(map_winter,
+              by = "student_id")
 
 below15_and_grades_primary <- map_winter_pivot %>%
   left_join(students %>% select(student_id = student_number,

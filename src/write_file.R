@@ -2,7 +2,6 @@
 library(ProjectTemplate)
 load.project()
 
-source(here::here("src", "Attendance.R"))
 source(here::here("src", "category_comments.R"))
 source(here::here("src", "course_teacher_name.R"))
 source(here::here("src", "deanslist_upload.R"))
