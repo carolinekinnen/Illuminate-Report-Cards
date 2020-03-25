@@ -18,7 +18,7 @@ This project contains a collection of scripts that will generate final grades an
 
 
 ## Project File Outline:
-
+```
 .
 └── ISBE_Student_Courses
     |
@@ -64,3 +64,4 @@ This project contains a collection of scripts that will generate final grades an
     └── .gitignore                   <- contains files that should not be
                                         uploaded to github
 
+```
