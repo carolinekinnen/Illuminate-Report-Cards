@@ -38,37 +38,39 @@ alg_8 <- read_csv(file = here::here("data/flatfiles/prealg_alg_students/alg_stud
 
 # ------------------------- ### DL Students with Modified Grading Scale ### --------------------------------
 # Has to be updated once each year
+# Commented out for now because get_y_avg function does not need to know who DL students are
+# testing 19-20 Q3
 
-# KAMS 
-kams_title <- drive_find("KAMS Modified Grading: 19-20SY", n_max = 30)
-
-kams_mod_grades <- bind_rows(ws(kams_title, "5th"), ws(kams_title, "6th"), 
-                             ws(kams_title, "7th"), ws(kams_title, "8th"))
-
-# KBCP 
-kbcp_mod_grades <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/17GAPma7f1e0EsXlphbeDFq7_fhK_1F5AQ7vdkH9DusE/edit#gid=0") %>%
-  select(2) %>%
-  clean_names()
-
-# KACP
-kacp_mod_grades <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1SwQhyioO9fULIz4gj_dhJ1_rktLiZHYzbqgsqkZ-Ov4/edit?ts=5d926196#gid=1171959828") %>%
-  select(2) %>%
-  clean_names()
-
-# KAC
-kac_title <- drive_find("KAC Modified Grading: 19-20SY", n_max = 30)
-
-kac_mod_grades <- bind_rows(ws(kac_title, "5th"), ws(kac_title, "6th"),
-                            ws(kac_title, "7th"), ws(kac_title, "8th"))
-
-# All
-# Note: don't bring in KOP or KAP because no GPA
-
-all_mod_grades <- bind_rows(kams_mod_grades,
-                            kbcp_mod_grades,
-                            kacp_mod_grades,
-                            kac_mod_grades) %>%
-  filter(!is.na(id_number))
+# # KAMS 
+# kams_title <- drive_find("KAMS Modified Grading: 19-20SY", n_max = 30)
+# 
+# kams_mod_grades <- bind_rows(ws(kams_title, "5th"), ws(kams_title, "6th"), 
+#                              ws(kams_title, "7th"), ws(kams_title, "8th"))
+# 
+# # KBCP 
+# kbcp_mod_grades <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/17GAPma7f1e0EsXlphbeDFq7_fhK_1F5AQ7vdkH9DusE/edit#gid=0") %>%
+#   select(2) %>%
+#   clean_names()
+# 
+# # KACP
+# kacp_mod_grades <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1SwQhyioO9fULIz4gj_dhJ1_rktLiZHYzbqgsqkZ-Ov4/edit?ts=5d926196#gid=1171959828") %>%
+#   select(2) %>%
+#   clean_names()
+# 
+# # KAC
+# kac_title <- drive_find("KAC Modified Grading: 19-20SY", n_max = 30)
+# 
+# kac_mod_grades <- bind_rows(ws(kac_title, "5th"), ws(kac_title, "6th"),
+#                             ws(kac_title, "7th"), ws(kac_title, "8th"))
+# 
+# # All
+# # Note: don't bring in KOP or KAP because no GPA
+# 
+# all_mod_grades <- bind_rows(kams_mod_grades,
+#                             kbcp_mod_grades,
+#                             kacp_mod_grades,
+#                             kac_mod_grades) %>%
+#   filter(!is.na(id_number))
 
 
 #-------------------------- ### SIS Roster Links from Deans List ###----------------------------------
