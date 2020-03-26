@@ -2,14 +2,16 @@
 library(ProjectTemplate)
 load.project()
 
-source(here::here("src", "category_comments.R"))
-source(here::here("src", "course_teacher_name.R"))
-source(here::here("src", "deanslist_upload.R"))
-source(here::here("src", "final_grades.R"))
-source(here::here("src", "KTC_data.R"))
-source(here::here("src", "powerschool_transcript_upload.R"))
-source(here::here("src", "quarter_number.R"))
-source(here::here("src", "retention_data.R"))
+# Write file will load project the project and run all the source scripts
+
+# source(here::here("src", "category_comments.R"))
+# source(here::here("src", "course_teacher_name.R"))
+# source(here::here("src", "deanslist_upload.R"))
+# source(here::here("src", "final_grades.R"))
+# source(here::here("src", "KTC_data.R"))
+# source(here::here("src", "powerschool_transcript_upload.R"))
+# source(here::here("src", "quarter_number.R"))
+# source(here::here("src", "retention_data.R"))
 
 
 # --------------------- ### Write Quarter Number Files for Illuminate ### ------------------
