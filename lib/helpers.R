@@ -48,6 +48,38 @@ ws <- function(df_title, grade_level){
 
 # if ws isn't working check that id_number column in Google Sheet only contains integer values, not characters
 
+# ---------------- ### Fixing Incorrect Column Names from Illuminate before Grades Functions ### ----------------
+# Fixing Homework and Behavior Grade/Percent Problem
+# Fields were named incorrectly - have to contain either "Grade" or "Percent", but these contain both
+# removing so grade and percent function will work
+
+behavior_homework_name_fixer <- function(df, grade, school){
+  grade <- toOrdinal::toOrdinal(as.integer(grade))
+  
+  df_fixed <- df %>%
+    rename("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_percent" := glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_grade_behavior_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_homework_percent" := glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_grade_homework_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_percent" := glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_grade_behavior_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_homework_percent" := glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_grade_homework_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_percent" := glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_grade_behavior_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_homework_percent" := glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_grade_homework_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_percent" := glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_grade_behavior_percent"),
+          "sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_homework_percent" := glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_grade_homework_percent")
+    ) 
+  
+  df_fixed
+}
+
+behavior_homework_name_fixer_by_row <- function(input_dataframe, iteration){
+  #grade <- input_dataframe %>% pull(grade)
+  grade <- input_dataframe$grade[[iteration]]
+  #school <- input_dataframe %>% pull(school)
+  school <- input_dataframe$school[[iteration]]
+  data <- input_dataframe$df[[iteration]]
+  behavior_homework_name_fixer(data, grade, school)
+}
+
+
 # ----------------------- ### Transform File into Grades Functions ### --------------------
 
 get_q_grades_pct <- function(data, grade_type = "grade", rc_quarter_input){

@@ -9,35 +9,43 @@
 # Fields were named incorrectly - have to contain either "Grade" or "Percent", but these contain both
 # removing so grade and percent function will work
 
-grade_df_list[[10]] <- grade_df_list[[10]] %>%
-  dplyr::rename(sy19_20_rc_kap_3rd_q1_3_4_behavior_percent = sy19_20_rc_kap_3rd_q1_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kap_3rd_q1_3_4_homework_homework_percent = sy19_20_rc_kap_3rd_q1_3_4_homework_grade_homework_percent,
-         sy19_20_rc_kap_3rd_q2_3_4_behavior_percent = sy19_20_rc_kap_3rd_q2_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kap_3rd_q2_3_4_homework_homework_percent = sy19_20_rc_kap_3rd_q2_3_4_homework_grade_homework_percent,
-         sy19_20_rc_kap_3rd_q3_3_4_behavior_percent = sy19_20_rc_kap_3rd_q3_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kap_3rd_q3_3_4_homework_homework_percent = sy19_20_rc_kap_3rd_q3_3_4_homework_grade_homework_percent,
-         sy19_20_rc_kap_3rd_q4_3_4_behavior_percent = sy19_20_rc_kap_3rd_q4_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kap_3rd_q4_3_4_homework_homework_percent = sy19_20_rc_kap_3rd_q4_3_4_homework_grade_homework_percent)
+# Figure out which lists in the dataframe contain KAP 3, KAP 4, KOP 3, and KOP 4
 
-grade_df_list[[11]] <- grade_df_list[[11]] %>%
-  dplyr::rename(sy19_20_rc_kap_4th_q1_3_4_behavior_percent = sy19_20_rc_kap_4th_q1_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kap_4th_q1_3_4_homework_homework_percent = sy19_20_rc_kap_4th_q1_3_4_homework_grade_homework_percent,
-         sy19_20_rc_kap_4th_q2_3_4_behavior_percent = sy19_20_rc_kap_4th_q2_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kap_4th_q2_3_4_homework_homework_percent = sy19_20_rc_kap_4th_q2_3_4_homework_grade_homework_percent,
-         sy19_20_rc_kap_4th_q3_3_4_behavior_percent = sy19_20_rc_kap_4th_q3_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kap_4th_q3_3_4_homework_homework_percent = sy19_20_rc_kap_4th_q3_3_4_homework_grade_homework_percent,
-         sy19_20_rc_kap_4th_q4_3_4_behavior_percent = sy19_20_rc_kap_4th_q4_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kap_4th_q4_3_4_homework_homework_percent = sy19_20_rc_kap_4th_q4_3_4_homework_grade_homework_percent)
+kap_kop <- grade_df_df %>%
+  filter(str_detect(file_name, "KAP_|KOP_")) %>% 
+  mutate(grade = str_extract(file_name, "\\d")) %>%
+  mutate(school = tolower(str_extract(file_name, "KAP|KOP")))
 
-grade_df_list[[20]] <- grade_df_list[[20]] %>%
-  dplyr::rename(sy19_20_rc_kop_3rd_q1_3_4_behavior_percent = sy19_20_rc_kop_3rd_q1_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kop_3rd_q1_3_4_homework_homework_percent = sy19_20_rc_kop_3rd_q1_3_4_homework_grade_homework_percent,
-         sy19_20_rc_kop_3rd_q2_3_4_behavior_percent = sy19_20_rc_kop_3rd_q2_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kop_3rd_q2_3_4_homework_homework_percent = sy19_20_rc_kop_3rd_q2_3_4_homework_grade_homework_percent,
-         sy19_20_rc_kop_3rd_q3_3_4_behavior_percent = sy19_20_rc_kop_3rd_q3_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kop_3rd_q3_3_4_homework_homework_percent = sy19_20_rc_kop_3rd_q3_3_4_homework_grade_homework_percent,
-         sy19_20_rc_kop_3rd_q4_3_4_behavior_percent = sy19_20_rc_kop_3rd_q4_3_4_behavior_grade_behavior_percent,
-         sy19_20_rc_kop_3rd_q4_3_4_homework_homework_percent = sy19_20_rc_kop_3rd_q4_3_4_homework_grade_homework_percent)
+# Anti-join to remove original files from grade_df_df
+not_kap_kop <- grade_df_df %>%
+  filter(!str_detect(file_name, "KAP_|KOP_")) 
+
+# Apply column name fixing function to KAP and KOP
+# Comment out KOP_4 in 20-21 when grade level exists
+
+kap_kop_fixed <- tribble(
+  ~file_name, ~df,
+  "KAP_3.csv", behavior_homework_name_fixer_by_row(kap_kop, 1),
+  "KAP_4.csv", behavior_homework_name_fixer_by_row(kap_kop, 2),
+  "KOP_3.csv", behavior_homework_name_fixer_by_row(kap_kop, 3),
+  #"KOP_4.csv", behavior_homework_name_fixer_by_row(kap_kop, 4) 
+)
+
+# Bind rows to join back to original dataframe of dataframes
+grade_df_df <- not_kap_kop %>%
+  bind_rows(kap_kop_fixed)
+
+# Doesn't work for now, keeping trying
+
+# kap_kop_fixed <- pmap(kap_kop, function(...){
+#   current_df <- tibble(...)
+#   behavior_homework_name_fixer_by_row(current_df)
+# }
+# )
+# 
+# kap_kop_fixed %>%
+#   select(-file_name) %>%
+#   pmap(behavior_homework_name_fixer)
 
 #-------------------------- ### Fixing Algebra/Pre-Algebra Problem ###----------------------------------
 
@@ -145,7 +153,7 @@ course_names <- course_names_teachers %>%
 
 #-------------------------- ### Current Quarter Report Card Data for Powerschool and Deans List and Retention Data and KTC ###----------------------------------
 
-rc_letter_grades <- grade_df_list %>% 
+rc_letter_grades <- grade_df_df[[2]] %>% #grade_df_list %>% 
   map_df(.f = get_q_grades_pct,
          grade_type = "grade",
          rc_quarter_input = rc_quarter
@@ -155,7 +163,7 @@ rc_letter_grades <- grade_df_list %>%
   filter(course_school == schoolabbreviation)  %>%
   select(-c(ps_schoolid, schoolname, schoolabbreviation))
 
-rc_percent <- grade_df_list %>% 
+rc_percent <- grade_df_df[[2]] %>% #grade_df_list %>% 
   map_df(.f = get_q_grades_pct,
          grade_type = "percent",
          rc_quarter_input = rc_quarter
@@ -200,22 +208,22 @@ quarter_grades_pivot_wide <- quarter_grades %>%
 
 # Run all quarters seperately then bind rows because setting rc_quarter_input = c("Q1", "Q2", "Q3", "Q4") was dropping subjects
 
-quarter_1_final <- grade_df_list %>% 
+quarter_1_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
   map_df(.f = get_q_grades_pct,
          grade_type = "percent",
          rc_quarter_input = c("Q1"))
 
-quarter_2_final <- grade_df_list %>% 
+quarter_2_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
   map_df(.f = get_q_grades_pct,
          grade_type = "percent",
          rc_quarter_input = c("Q2"))
 
-quarter_3_final <- grade_df_list %>% 
+quarter_3_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
   map_df(.f = get_q_grades_pct,
          grade_type = "percent",
          rc_quarter_input = c("Q3"))
 
-quarter_4_final <- grade_df_list %>% 
+quarter_4_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
   map_df(.f = get_q_grades_pct,
          grade_type = "percent",
          rc_quarter_input = c("Q4"))

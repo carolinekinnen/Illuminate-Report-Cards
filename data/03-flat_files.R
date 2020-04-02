@@ -20,6 +20,16 @@ grade_df_list <- file_list %>%
   map(read_csv) %>%
   map(clean_names)
 
+# Alternatively:
+# Data frame of data frames
+file_list_short_names <- dir(path = here::here("data/flatfiles/rc_export/"), 
+                             pattern = "\\.csv", full.names = FALSE)
+
+grade_df_df <- data_frame(
+  file_name = file_list_short_names,
+  df = grade_df_list
+)
+
 # ------------------------- ### Pre-Algebra and Algebra Students ### --------------------------------
 # Can be removed after 19-20
 
