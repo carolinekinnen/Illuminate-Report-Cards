@@ -19,7 +19,7 @@ load.project()
 
 write.csv(quarter_number %>%
             as.data.frame(),
-          file = here::here("/19-20 Files/quarter_numbers/quarter_numbers.csv"), 
+          file = here::here("output/19-20 Files/quarter_numbers/quarter_numbers.csv"), 
           row.names = FALSE)
 
 
@@ -87,22 +87,29 @@ write.csv(final_grades_gpa_illuminate_upload %>%
 
 # 4. --------------------- ### Write Transcript File for Powerschool ### ------------------
 # Write transcript file after grades are finalized 
+# Also ps_upload_quarter needs to be saved in GCS to be pulled into Load GPAs code for On-Track Snapshots
 
-ps_upload_file_name <- sprintf(paste0("/19-20 Files/transcripts/ps_upload_",
+ps_upload_file_name_quarter <- sprintf(paste0("output/",
+                                    sy_abbreviation,
+                                    " Files/transcripts/ps_upload_quarter_",
                                       rc_quarter,
                                       "_%s.csv"),
                                today())
 
 write.csv(ps_upload_quarter %>%
             as.data.frame(),
-          file = "~/Downloads/ps_upload_quarter2_file.csv",
-          # file = here::here(ps_upload_file_name),
+          file = here::here(ps_upload_file_name_quarter),
           row.names = FALSE)
+
+ps_upload_file_name_final <- sprintf(paste0("output/",
+                                              sy_abbreviation,
+                                              " Files/transcripts/ps_upload_final",
+                                              "_%s.csv"),
+                                       today())
 
 write.csv(ps_upload_final %>%
             as.data.frame(),
-          file = "~/Downloads/ps_upload_final_file.csv",
-          # file = here::here(ps_upload_file_name),
+          file = here::here(ps_upload_file_name_final),
           row.names = FALSE)
 
 # 5. --------------------- ### Write Quarter Grades File for Deans List ### ------------------
@@ -110,8 +117,9 @@ write.csv(ps_upload_final %>%
 
 dl_upload_file_name_input <- function(schoolname) {
 
-  file <- sprintf(paste0(#"/19-20 Files/deanslist/deanslist_upload_",
-    "~/Downloads/",
+  file <- sprintf(paste0("output/",
+                         sy_abbreviation,
+                         " Files/deanslist/deanslist_upload_",
                          schoolname, 
                          "_",
                          rc_quarter,
@@ -121,17 +129,17 @@ dl_upload_file_name_input <- function(schoolname) {
 
 write.csv(dl_upload_kac %>%
             as.data.frame(),
-          file = dl_upload_file_name_input("KBCP"),
+          file = dl_upload_file_name_input("KAC"),
           row.names = FALSE)
 
 write.csv(dl_upload_kams %>%
             as.data.frame(),
-          file = dl_upload_file_name_input("KBCP"),
+          file = dl_upload_file_name_input("KAMS"),
           row.names = FALSE)
 
 write.csv(dl_upload_kap %>%
             as.data.frame(),
-          file = dl_upload_file_name_input("KBCP"),
+          file = dl_upload_file_name_input("KAP"),
           row.names = FALSE)
 
 write.csv(dl_upload_kbcp %>%
@@ -141,35 +149,39 @@ write.csv(dl_upload_kbcp %>%
 
 write.csv(dl_upload_one %>%
             as.data.frame(),
-          file = dl_upload_file_name_input("KBCP"),
+          file = dl_upload_file_name_input("KOA"),
           row.names = FALSE)
 
-# 6. --------------------- ### Write Final Grades File for GCS Bucket ### ------------------
-# Needs to be saved in GCS to be pulled into Load GPAs code for On-Track Snapshots
-
-write.csv(ps_upload_final %>%
-          as.data.frame(),
-          file = "~/Downloads/ps_upload_final_file.csv",
-          # file = here::here(ps_upload_file_name),
-          row.names = FALSE)
-
-# 7. --------------------#### Write Category Comments #### -------------------------
+# 6. --------------------#### Write Category Comments #### -------------------------
 # Not writing yet because Maggie hasn't confirmed she's ok with plan
 # also need to figure out Spanish
 
 
-# 8. --------------------- ### Write File for KTC ### ------------------
+# 7. --------------------- ### Write File for KTC ### ------------------
 
-write.csv(ktc_7_request %>% as.data.frame(),
-          #file = here::here(ktc_7_request.csv"),
-          file = "~/Downloads/ktc_7_request.csv",
+ktc_request_file_name <- sprintf(paste0("output/",
+                                              sy_abbreviation,
+                                              " Files/ktc/ktc_7_",
+                                              rc_quarter,
+                                              "_%s.csv"),
+                                       today())
+
+write.csv(ktc_7_request %>%
+          as.data.frame(),
+          file = here::here(ktc_requests_file_name),
           row.names = FALSE)
 
-# 9. ------------------ ### Write File for Retention Data ### ---------
+# 8. ------------------ ### Write File for Retention Data ### ---------
+
+retention_file_name <- sprintf(paste0("output/",
+                                        sy_abbreviation,
+                                        " Files/retention/failing_or_below15_",
+                                        rc_quarter,
+                                        "_%s.csv"),
+                                 today())
 
 write_csv(failing_or_below15, 
-          #file = here::here(failing_or_below15.csv"),
-          file = "~/Downloads/failing_or_below15.csv",
+          file = here::here(retention_file_name),
           row.names = FALSE)
 
 
