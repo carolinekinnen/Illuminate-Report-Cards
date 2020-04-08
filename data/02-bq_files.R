@@ -19,7 +19,8 @@ terms <- get_powerschool("terms") %>%
          firstday,
          lastday) %>%
   collect()  %>%
-  unique()
+  unique() %>%
+  arrange(id)
 
 sy_abbreviation <- terms$abbreviation[1]
 
