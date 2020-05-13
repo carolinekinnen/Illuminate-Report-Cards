@@ -24,6 +24,21 @@ grade_scale <- tribble(
   "F",    0.0
 )
 
+# Outdated, should not be used anymore but kept for record keeping and to calculate past years
+grade_scale_old <- tribble(
+  ~grade, ~points,
+  "A+",   4.0,
+  "A",    4.0,
+  "A-",   3.66,
+  "B+",   3.33,
+  "B",    3.0,
+  "B-",   2.66,
+  "C+",   2.33,
+  "C",    2.0,
+  "C-",   1.66,
+  "F",    0.0
+)
+
 # Grade and percent 
 grade_percent_scale <- tibble(
   grade = c(rep("A+", 21),

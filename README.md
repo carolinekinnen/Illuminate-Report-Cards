@@ -51,6 +51,7 @@ This project contains a collection of scripts that will generate final grades an
     |   ├── powerschool_transcript_upload.R
     |   ├── quarter_number.R
     |   ├── retention_data.R
+    |   ├── promotion_8th.R
     |   └── README.md
     |
     ├── lib                         

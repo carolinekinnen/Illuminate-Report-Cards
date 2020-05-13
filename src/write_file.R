@@ -184,5 +184,32 @@ write_csv(failing_or_below15,
           file = here::here(retention_file_name),
           row.names = FALSE)
 
+# 9. ------------------ ### Write Google Sheets file for 8th Grade Promotion Data ### ---------
 
+wb <- createWorkbook()
+
+addWorksheet(wb, sheet = "KAMS")
+addWorksheet(wb, sheet = "KBCP")
+addWorksheet(wb, sheet = "KAC")
+addWorksheet(wb, sheet = "KOA")
+
+kams_final <- KAMS_8th_promotion_data %>% 
+  as.data.frame() 
+writeData(wb, sheet = "KAMS", kams_final)
+
+kbcp_final <- KBCP_8th_promotion_data %>% 
+  as.data.frame() 
+writeData(wb, sheet = "KBCP", kbcp_final)
+
+kac_final <- KAC_8th_promotion_data %>% 
+  as.data.frame()
+writeData(wb, sheet = "KAC", kac_final)
+
+koa_final <- KOA_8th_promotion_data %>% 
+  as.data.frame()
+writeData(wb, sheet = "KAC", koa_final)
+
+saveWorkbook(wb, 
+             paste0(sy_abbreviation, "_Promotions_GPA.xlsx"),
+             overwrite = TRUE)
 

@@ -172,12 +172,21 @@ course_section <-  cc %>%
 
 #-------------------------- ### Powerschool Transcript Tables ###----------------------------------
 
+# needed for transcripts and 8th grade promotion data
+
 students_powerschool_transcripts <- get_powerschool("students") %>%
   select(student_id = student_number,
          ps_id = id,
          grade_level, 
          ps_schoolid = schoolid) %>%
   collect()
+
+storedgrades <- get_powerschool("storedgrades",
+                                collect = TRUE)
+
+pgfinalgrades <- get_powerschool("pgfinalgrades",
+                                 collect = TRUE)
+
 
 # ------------------------- ### MAP Data for Retention and KTC ### ---------------------------
 
