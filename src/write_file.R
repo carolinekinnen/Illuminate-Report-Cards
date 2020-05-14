@@ -159,7 +159,7 @@ write.csv(dl_upload_one %>%
 
 # 7. --------------------- ### Write File for KTC ### ------------------
 
-ktc_request_file_name <- sprintf(paste0("output/",
+ktc_7_request_file_name <- sprintf(paste0("output/",
                                               sy_abbreviation,
                                               " Files/ktc/ktc_7_",
                                               rc_quarter,
@@ -168,7 +168,18 @@ ktc_request_file_name <- sprintf(paste0("output/",
 
 write.csv(ktc_7_request %>%
           as.data.frame(),
-          file = here::here(ktc_requests_file_name),
+          file = here::here(ktc_7_requests_file_name),
+          row.names = FALSE)
+
+ktc_6_request_file_name <- sprintf(paste0("output/",
+                                        sy_abbreviation,
+                                        " Files/ktc/ktc_6_",
+                                        "_%s.csv"),
+                                 today())
+
+write.csv(ktc_students_6th_file %>%
+          as.data.frame(),
+          file = here::here(ktc_6_request_file_name),
           row.names = FALSE)
 
 # 8. ------------------ ### Write File for Retention Data ### ---------

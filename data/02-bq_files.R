@@ -10,6 +10,9 @@ sy <- calc_academic_year(today(), format = 'firstyear')
 current_first_year <- calc_academic_year(lubridate::today(),
                                          format = "first_year")
 
+current_last_year <- calc_academic_year(today(), 
+                                        format = "second_year")
+
 ps_termid <- calc_ps_termid(current_first_year)
 
 terms <- get_powerschool("terms") %>%
@@ -23,6 +26,18 @@ terms <- get_powerschool("terms") %>%
   arrange(id)
 
 sy_abbreviation <- terms$abbreviation[1]
+
+terms_last_year <- get_powerschool("terms") %>% 
+  filter(id == ps_termid - 100) %>%
+  select(id,
+         abbreviation,
+         firstday,
+         lastday) %>%
+  collect()  %>%
+  unique() %>%
+  arrange(id)
+
+sy_abbreviation_last_year <- terms_last_year$abbreviation[1]
 
 # Last day of quarter in which report cards are being generated 
 rc_quarter_table <- terms %>% 
@@ -53,14 +68,14 @@ calculated_type <- case_when(
                               # will eventually use to decide whether or not to run seperate script for DL vs gen ed
 )
 
-# MAP term names 
-termname_map <- "Winter 2019-2020"
+# MAP term names - Current Year
+termname_map_winter <- paste0("Winter ", current_first_year, "-", current_last_year)
+termname_map_spring <- paste0("Spring " , current_first_year, "-", current_last_year)
 
-#calculate first year of academic year using silounloadr
-current_first_year <- calc_academic_year(today(), format = "first_year") 
+# MAP term names - Last Year
+# used in KTC_data
 
-# calculate last year of academic year
-current_last_year <- calc_academic_year(today(), format = "second_year")
+termname_map_last_spring <- paste0("Spring ", current_first_year - 1, "-", current_last_year - 1)
 
 #-------------------------- ### Attendance Tables ###------------------------------------
 
@@ -188,7 +203,7 @@ pgfinalgrades <- get_powerschool("pgfinalgrades",
                                  collect = TRUE)
 
 
-# ------------------------- ### MAP Data for Retention and KTC ### ---------------------------
+# ------------------------- ### MAP Data for Retention and KTC - Winter ### ---------------------------
 
 # All Winter MAP scores
 map_winter <- get_nwea_map("cdf_combined_kipp_cps") %>%
@@ -197,7 +212,7 @@ map_winter <- get_nwea_map("cdf_combined_kipp_cps") %>%
          test_ritscore,
          test_percentile,
          measurement_scale) %>%
-  filter(term_name == termname_map) %>%
+  filter(term_name == termname_map_winter) %>%
   collect()
 
 map_winter_pivot <- map_winter %>%
@@ -207,6 +222,25 @@ map_winter_pivot_students <- map_winter_pivot %>%
   left_join(students %>%
             dplyr::rename(student_id = student_number), by = "student_id") %>%
   left_join(schools %>% select(-schoolname), by = "schoolid")
+
+# Spring last year MAP scores 
+map_last_spring <- get_nwea_map("cdf_combined_kipp_cps") %>%
+  select(student_id,
+         term_name,
+         test_ritscore,
+         test_percentile,
+         measurement_scale) %>%
+  filter(term_name == termname_map_last_spring) %>%
+  collect()
+
+map_last_spring_pivot <- map_last_spring %>%
+  pivot_wider(names_from = measurement_scale, values_from = c(test_ritscore, test_percentile))
+
+map_last_spring_students <- map_last_spring_pivot %>%
+  left_join(students %>%
+              dplyr::rename(student_id = student_number), by = "student_id") %>%
+  left_join(schools %>% select(-schoolname), by = "schoolid")
+         
 
 # ----------------------- ### Illuminate Primary Gradebook tables for Retention data ### ----------------
 # Need to pull from Illuminate gradebooks instead of report cards because report cards don't have grades in A/B/C/D scale

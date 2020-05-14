@@ -3,10 +3,10 @@
 
 identify_quarter <- function(date) {
   case_when(
-    date >= terms$firstday[1] & date < terms$firstday[3] ~ "Q1",
-    date >= terms$firstday[3] & date < terms$firstday[4] ~ "Q2",
-    date >= terms$firstday[4] & date < terms$firstday[5] ~ "Q3",
-    date >= terms$firstday[5] & date <= terms$lastday[5] ~ "Q4",
+    date >= terms$firstday[1] & date < terms$lastday[4] ~ "Q1",
+    date >= terms$firstday[3] & date < terms$lastday[5] ~ "Q2",
+    date >= terms$firstday[4] & date < terms$lastday[6] ~ "Q3",
+    date >= terms$firstday[5] & date <= terms$lastday[7] ~ "Q4",
     TRUE ~ "not in SY")
 }
 
