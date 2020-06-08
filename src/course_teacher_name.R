@@ -6,26 +6,32 @@
 
 # --------------------- ### Courses and Teachers - Middle ###--------------------------
 
-course_subject <- course_names_teachers %>%
-  mutate(subject_course = sprintf("%s_course", subject)) %>%
-  select(-c(teacher_full_name, #teacher_first_last, 
-            subject)) %>%
-  spread(subject_course, course_long_name)
-
 teacher_subject <- course_names_teachers %>%
   mutate(subject_teacher = sprintf("%s_teacher", subject)) %>%
-  select(-c(course_long_name, 
-            subject)) %>%
-  spread(subject_teacher, teacher_full_name) #teacher_first_last) 
+  select(-c(course_number, subject, course_long_name)) %>%
+  group_by(subject_teacher, schoolid, studentid, student_number, grade_level, home_room) %>%
+  mutate(row = row_number()) %>%
+  #group_by(schoolid, studentid, student_number, home_room, grade_level, student_first, student_last) %>%
+  pivot_wider(id_cols = c(row, schoolid, studentid, student_number, grade_level, home_room), 
+              names_from = subject_teacher, values_from = teacher_full_name) %>%
+  select(-row)
 
-course_names_teachers_final <- course_subject %>%
-  left_join(teacher_subject,
+course_subject <- course_names_teachers %>%
+  mutate(subject_course = sprintf("%s_course", subject)) %>%
+  select(-c(course_number, subject, teacher_full_name)) %>%
+  group_by(subject_course, schoolid, studentid, student_number, grade_level, home_room) %>%
+  mutate(row = row_number()) %>%
+  #group_by(schoolid, studentid, student_number, home_room, grade_level, student_first, student_last) %>%
+  pivot_wider(id_cols = c(row, schoolid, studentid, student_number, grade_level, home_room), 
+              names_from = subject_course, values_from = course_long_name) %>%
+  select(-row)
+
+course_names_teachers_final <- course_subject2 %>%
+  left_join(teacher_subject2,
             by = c("schoolid",
                    "studentid",
                    "student_number",
-                   "grade_level",
-                   "student_first",
-                   "student_last")) %>%
+                   "grade_level")) %>%
   select(-home_room.y) %>%
   dplyr::rename(home_room = home_room.x) %>%
   mutate(prealgebra_spanish = if_else(is.na(`Pre-Algebra_course`),`Pre-Algebra_course`, 'Pre-álgebra'),
@@ -37,31 +43,30 @@ course_names_teachers_final <- course_subject %>%
     home_room == "4th Central State University" ~ "Faith Anderson",
     home_room == "4th Philander Smith College" ~ "Jacques Edwards")) %>% 
   dplyr::rename(ELA = `English Language Arts_course`,
-         `ELA Teacher` = `English Language Arts_teacher`,
-         Math = `Mathematics_course`, 
-         `Math Teacher` = `Mathematics_teacher`,
-         Science = `Science_course`,
-         # Science_teacher = `Science Teacher`, 
-         Art = Art_course,
-         `Art Teacher` = Art_teacher,
-         PE = `Physical Education_course`, 
-         `PE Teacher` = `Physical Education_teacher`,
-         `Social Studies` = `Social Studies_course`,
-         `Social Studies Teacher` = `Social Studies_teacher`,
-         Dance = `Dance_course`,
-         `Dance Teacher` = `Dance_teacher`,
-         `Literacy Centers` = `Literacy Centers_course`,
-         `Literacy Centers Teacher` = `Literacy Centers_teacher`,
-         `Algebra Spanish` = algebra_spanish,
-         `Math Spanish` = math_spanish,
-         `Pre Algebra Spanish` = prealgebra_spanish) %>%
-   mutate(
+                `ELA Teacher` = `English Language Arts_teacher`,
+                Math = `Mathematics_course`, 
+                `Math Teacher` = `Mathematics_teacher`,
+                Science = `Science_course`,
+                # Science_teacher = `Science Teacher`, 
+                Art = Art_course,
+                `Art Teacher` = Art_teacher,
+                PE = `Physical Education_course`, 
+                `PE Teacher` = `Physical Education_teacher`,
+                `Social Studies` = `Social Studies_course`,
+                `Social Studies Teacher` = `Social Studies_teacher`,
+                Dance = `Dance_course`,
+                `Dance Teacher` = `Dance_teacher`,
+                `Literacy Centers` = `Literacy Centers_course`,
+                `Literacy Centers Teacher` = `Literacy Centers_teacher`,
+                `Algebra Spanish` = algebra_spanish,
+                `Math Spanish` = math_spanish,
+                `Pre Algebra Spanish` = prealgebra_spanish) %>%
+  mutate(
     ELA = case_when(
       `ELA Teacher` == "Kayla Nuguid" ~ "ESL/English Language Arts",    # renaming a course per KOA request
       TRUE ~ ELA)
-  )
-
-
+  ) 
+  
 #Reviewing work - finding cases of duplicate IDs
 
 # flags duplicate ids, should be 0
@@ -100,4 +105,21 @@ primary_course_teacher <- users_names %>%
             by = "studentid") %>%
   filter(grade_level < 4) %>%
   filter(!grepl("Science", course_long_name))
+
+
+# Adding in subjects to  KOP and KAP 3rd grade 
+# special circumstance due to distance learning report cards
+
+course_3_teacher <- primary_course_teacher %>%
+  filter(grade_level == 3,
+         !str_detect(course_long_name, "ELL"),
+         !str_detect(course_long_name, "IXL")) %>%
+  mutate(Science = "3rd Science",
+         Science_teacher = teacher_full_name,
+         Math = "3rd Math",
+         `Math Teacher` = teacher_full_name,
+         `Math Spanish` = "Matemáticas",
+         ELA = "3rd Reading",
+         `ELA Teacher` = teacher_full_name) 
+
 

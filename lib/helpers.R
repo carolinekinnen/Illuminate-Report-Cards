@@ -57,14 +57,14 @@ behavior_homework_name_fixer <- function(df, grade, school){
   grade <- toOrdinal::toOrdinal(as.integer(grade))
   
   df_fixed <- df %>%
-    rename("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_percent" := glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_grade_behavior_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_homework_percent" := glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_grade_homework_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_percent" := glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_grade_behavior_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_homework_percent" := glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_grade_homework_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_percent" := glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_grade_behavior_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_homework_percent" := glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_grade_homework_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_percent" := glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_grade_behavior_percent"),
-          "sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_homework_percent" := glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_grade_homework_percent")
+    dplyr::rename("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_grade_behavior_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_grade_homework_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_grade_behavior_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_grade_homework_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_grade_behavior_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_grade_homework_percent"),
+           "sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_grade_behavior_percent"),
+          "sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_grade_homework_percent")
     ) 
   
   df_fixed
@@ -101,14 +101,7 @@ get_q_grades_pct <- function(data, grade_type = "grade", rc_quarter_input){
            subject = str_extract(rc_field, "choice_reading|guided_reading|behavior|math|reading|step|homework|science|musical_theater|writing|art|ela|pe|lit_centers|social_studies|explorations|dance|pre_algebra|algebra|physical_education"),
            course_school = toupper(stringr::str_extract(rc_field, "kap|kop|kacp|kac|kbcp|kams|koa"))) %>%
   #  tidyr::separate("subject3", c("sub1", "sub2"), sep = " ") %>%
-    mutate(#one_subj = sub1 == sub2,
-           # subject4 = if_else(one_subj, sub1, "null"),
-           # subject5 = if_else(is.na(one_subj), sub1, subject4),
-           # subject6 = if_else(grepl("null", subject5), paste(sub1, sub2, sep = " "), subject5),
-           # subject7 = gsub("koa ", "", subject6),
-           # subject8 = if_else(subject7 == "social", "social studies", subject7),
-           # subject = if_else(subject7 == "lit", "lit centers", subject8),
-      subject = case_when(
+    mutate(subject = case_when(
         subject == "lit_centers" ~ "lit centers",
         subject == "social_studies" ~ "social",
         subject == "physical_education" ~ "pe",
@@ -136,13 +129,14 @@ get_yavg_grades <- function(data){
     select(site_id, student_id, contains("y1_avg")) %>% 
     tidyr::gather(rc_field, grade, -site_id:-student_id) %>% 
     mutate(subject = str_extract(rc_field, "math|ela|social|science|art|music|reading|ss|lit_centers|dance|pre_algebra|algebra|pe"),    # have to add new subjects
-           course_school = toupper(stringr::str_extract(rc_field, "kacp|kac|kbcp|kams|koa"))) %>% 
+           course_school = toupper(stringr::str_extract(rc_field, "kop|kap|kacp|kac|kbcp|kams|koa"))) %>% 
     select(-c(rc_field)) %>%
     left_join(schools %>% dplyr::rename(site_id = schoolid), by = "site_id") %>% 
     filter(course_school == schoolabbreviation) %>% 
+    filter(course_school %in% c("KOP", "KAP", "KACP", "KAC", "KBCP", "KAMS", "KOA")) %>%
     filter(!is.na(grade)) %>%
     mutate(subject = case_when(
-      subject == "social" ~ "social studies",
+     # subject == "social" ~ "social studies",
       subject == "lit_centers" ~ "lit centers",
       TRUE ~ subject
     ))

@@ -54,6 +54,18 @@ write.csv(primary_course_teacher %>%
           file = here::here(primary_course_teacher_file_name), 
           row.names = FALSE)
 
+primary_course_teacher_3_file_name <- sprintf(paste0("output/19-20 Files/course_teacher/primary_course_teacher_3_name_",
+                                                     rc_quarter,
+                                                     "_%s.csv"),
+                                              today())
+
+# only need for distance learning report card
+
+# write.csv(course_3_teacher %>%
+#             as.data.frame(),
+#           file = here::here(primary_course_teacher_3_file_name), 
+#           row.names = FALSE)
+
 
 #2. --------------------- ### Write Attendance File for Illuminate  ### ------------------
 # Write day after quarter ends
@@ -78,6 +90,30 @@ final_grades_file <- sprintf(paste0("output/",
                                     " Files/grades/",
                                     rc_quarter,  
                                     " RC Final Grades %s.csv"), lubridate::today())
+
+# rename columns for easy update to Illuminate
+final_grades_gpa_illuminate_upload <- final_grades_gpa_illuminate_upload %>%
+  rename(`art grade` = grade_art,
+         `art percent` = percent_art,
+         `dance grade` = grade_dance,
+         `dance percent` = percent_dance,
+         `ela grade` = grade_ela,
+         `ela percent` = percent_ela,
+         `literacy centers grade` = grade_lit_centers,
+         `literacy centers percent` = percent_lit_centers,
+         `pe grade` = grade_pe,
+         `pe percent` = percent_pe,
+         `science grade` = grade_science,
+         `science percent` = percent_science,
+         `social studies grade` = grade_social,
+         `social studies percent` = percent_social,
+         `math grade` = grade_math,
+         `math percent` = percent_math,
+         `prealg grade` = grade_pre_algebra,
+         `prealg percent` = percent_pre_algebra,
+         `alg grade` = grade_algebra,
+         `alg percent` = percent_algebra,
+         gpa = cumulative_gpa)
 
 write.csv(final_grades_gpa_illuminate_upload %>%
           as.data.frame(),

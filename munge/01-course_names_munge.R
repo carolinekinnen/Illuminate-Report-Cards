@@ -47,3 +47,6 @@ student_schools <- students_powerschool_transcripts %>%
          student_id) %>% 
   left_join(schools,
             by = c("ps_schoolid" = "schoolid"))
+
+
+

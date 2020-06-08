@@ -35,27 +35,28 @@ kap_kop_fixed <- tribble(
 grade_df_df <- not_kap_kop %>%
   bind_rows(kap_kop_fixed)
 
-# Doesn't work for now, keeping trying
-
-# kap_kop_fixed <- pmap(kap_kop, function(...){
-#   current_df <- tibble(...)
-#   behavior_homework_name_fixer_by_row(current_df)
-# }
-# )
-# 
-# kap_kop_fixed %>%
-#   select(-file_name) %>%
-#   pmap(behavior_homework_name_fixer)
-
 #-------------------------- ### Fixing Algebra/Pre-Algebra Problem ###----------------------------------
 
 # changing Math to Pre-Algebra and Algebra for KOA and KBCP 7th and KOA 8th
 # was Math for Q1 because Alg and Pre-Alg field groups were not set up
 # only needs to be run in 2019-2020 school year
 
+# Figure out which lists in the dataframe contain KBCP 7, 8 and KOA 7, 8
+
+kbcp_koa <- grade_df_df %>%
+  filter(str_detect(file_name, "KBCP_|KOA_")) %>% 
+  mutate(grade = str_extract(file_name, "\\d")) %>%
+  filter(grade %in% c(7,8)) %>%
+  mutate(school = tolower(str_extract(file_name, "KBCP|KOA")))
+
+# Anti-join to remove original files from grade_df_df
+not_kbcp_koa <- grade_df_df %>%
+  mutate(grade = str_extract(file_name, "\\d")) %>%
+  filter(file_name != "KBCP_7.csv" & file_name != "KBCP_8.csv" & file_name != "KOA_7.csv" & file_name != "KOA_8.csv")
+           
 # KOA 7 - Pre-Algebra
 
-koa_7 <- grade_df_list[[18]]
+koa_7 <- kbcp_koa[[2]][[3]]
 
 koa_7_prealg <- koa_7 %>%
   filter(site_id == 400180,
@@ -68,11 +69,11 @@ koa_7_prealg <- koa_7 %>%
 koa_7 <- koa_7 %>%
   anti_join(koa_7_prealg, by = "student_id")  # remove them all from grade_df_list then do bind so won't be duplicates
 
-grade_df_list[[18]] <- bind_rows(koa_7_prealg, koa_7) 
+kbcp_koa[[2]][[3]] <- bind_rows(koa_7_prealg, koa_7) 
 
 # KOA 8 - Algebra
 
-koa_8 <- grade_df_list[[19]]
+koa_8 <- kbcp_koa[[2]][[4]]
 
 koa_8_alg <- koa_8 %>%
   filter(site_id == 400180,
@@ -85,11 +86,11 @@ koa_8_alg <- koa_8 %>%
 koa_8 <- koa_8 %>%
   anti_join(koa_8_alg, by = "student_id")
 
-grade_df_list[[19]] <- bind_rows(koa_8_alg, koa_8)
+kbcp_koa[[2]][[4]] <- bind_rows(koa_8_alg, koa_8)
 
 # KBCP 7 - Pre-Algebra and typo in course name
 
-kbcp_7 <- grade_df_list[[14]]
+kbcp_7 <- kbcp_koa[[2]][[1]]
 
 kbcp_7_prealg <- kbcp_7 %>%
   filter(site_id == 400163, 
@@ -97,22 +98,23 @@ kbcp_7_prealg <- kbcp_7 %>%
   mutate(sy19_20_rc_kbcp_7th_q1_pre_algebra_pre_algebra_grade = sy19_20_rc_kbcp_7th_q1_math_math_grade,
          sy19_20_rc_kbcp_7th_q1_pre_algebra_pre_algebra_percent = sy19_20_rc_kbcp_7th_q1_math_math_percent) %>%
   mutate(sy19_20_rc_kbcp_7th_q1_math_math_grade = NA,
-         sy19_20_rc_kbcp_7th_q1_math_math_percent = NA) %>%
-
-# Field group course name spelled incorrectly in Illuminate, has to be corrected to match up with subject 
-  dplyr::rename(sy19_20_rc_kbcp_7th_q1_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q1_course_math_course_name_pre_agebra,
-         sy19_20_rc_kbcp_7th_q2_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q2_course_math_course_name_pre_agebra,
-         sy19_20_rc_kbcp_7th_q3_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q3_course_math_course_name_pre_agebra,
-         sy19_20_rc_kbcp_7th_q4_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q1_course_math_course_name_pre_agebra)
+         sy19_20_rc_kbcp_7th_q1_math_math_percent = NA) 
 
 kbcp_7 <- kbcp_7 %>%
-  anti_join(kbcp_7_prealg, by = "student_id")
+  anti_join(kbcp_7_prealg, by = "student_id") %>%
+  
+  # Field group course name spelled incorrectly in Illuminate, has to be corrected to match up with subject 
+  dplyr::rename(sy19_20_rc_kbcp_7th_q1_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q1_course_math_course_name_pre_agebra,
+                sy19_20_rc_kbcp_7th_q2_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q2_course_math_course_name_pre_agebra,
+                sy19_20_rc_kbcp_7th_q3_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q3_course_math_course_name_pre_agebra,
+                sy19_20_rc_kbcp_7th_q4_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q4_course_math_course_name_pre_agebra)
 
-grade_df_list[[14]] <- bind_rows(kbcp_7_prealg, kbcp_7)
+kbcp_koa[[2]][[1]] <- bind_rows(kbcp_7_prealg, kbcp_7)
+
 
 # KBCP 8 - Algebra
 
-kbcp_8 <- grade_df_list[[15]] 
+kbcp_8 <- kbcp_koa[[2]][[2]] 
 
 kbcp_8_alg <- kbcp_8 %>%
   filter(site_id == 400163,
@@ -125,7 +127,11 @@ kbcp_8_alg <- kbcp_8 %>%
 kbcp_8 <- kbcp_8 %>%
   anti_join(kbcp_8_alg, by = "student_id")
 
-grade_df_list[[15]] <- bind_rows(kbcp_8_alg, kbcp_8)
+kbcp_koa[[2]][[2]] <- bind_rows(kbcp_8_alg, kbcp_8)
+
+# Bind rows to join back to original dataframe of dataframes
+grade_df_df <- not_kbcp_koa %>%
+  bind_rows(kbcp_koa)
 
 
 #-------------------------- ### Course Names for Grades 4-8 ###----------------------------------
@@ -174,12 +180,12 @@ rc_percent <- grade_df_df[[2]] %>% #grade_df_list %>%
   select(-c(ps_schoolid, schoolname, schoolabbreviation))
 
 quarter_grades <-rc_letter_grades %>%
-  left_join(course_names, 
-            by = c("student_id",
-                   "store_code",
-                   "course_school",
-                   "site_id",
-                   "subject")) %>%
+  # left_join(course_names_teachers, #course_names, 
+  #           by = c("student_id",
+  #                  "store_code",
+  #                  "course_school",
+  #                  "site_id",
+  #                  "subject")) %>%
   left_join(rc_percent,
             by = c("student_id",
                    "store_code",
@@ -226,15 +232,20 @@ quarter_3_final <- grade_df_df[[2]] %>% #grade_df_list %>%
 quarter_4_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
   map_df(.f = get_q_grades_pct,
          grade_type = "percent",
-         rc_quarter_input = c("Q4"))
+         rc_quarter_input = c("Q4")) 
 
 all_quarter_percents <- quarter_1_final %>%
-  bind_rows(quarter_2_final, quarter_3_final, quarter_4_final) %>%
+  bind_rows(quarter_2_final, #quarter_3_final, 
+            quarter_4_final) %>%
   mutate(percent = as.double(str_extract(percent, "[[:digit:]]+"))) 
 
 final_percents <- all_quarter_percents %>%
   dplyr::group_by(site_id, student_id, subject) %>%
-  summarize(percent = mean(percent))
+  summarize(percent = mean(percent)) %>%
+  mutate(percent = case_when(
+    percent < 70 ~ 70,
+    TRUE ~ percent
+  ))
 
 # ----------------------------- ### Year Average Grades for Powerschool and Illuminate ### --------------
 
@@ -252,7 +263,7 @@ if(calculated_type == "first_upload") {
               by = "percent") %>%
     select(-percent)
 } else {
-  final_grades <- grade_df_list_rm_prim %>% 
+  final_grades <- grade_df_list %>% #grade_df_list_rm_prim %>% 
     map_df(.f = get_yavg_grades) %>%
     select(site_id, student_id, subject, grade)
 }

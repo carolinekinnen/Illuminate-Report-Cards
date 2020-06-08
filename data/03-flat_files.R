@@ -1,7 +1,8 @@
 
 #-------------------------- ### Illuminate Report Card Data ###-------------------------------------
 
-# Report card files (one per grade per school) need to be exported from Illuminate, 
+# Report card files (one per grade per school for grades 3-8. No primary because they
+# don't calculate final grade) need to be exported from Illuminate, 
 # unzipped, and moved into GCS Storage/raw_data_storage/Illuminate-Report-Cards/Illuminate-Grades/SY/
 
 gcs_global_bucket("raw_data_storage")
@@ -11,16 +12,15 @@ map2(.x = schools_map,
      .y = grades_map,
      .f = ~get_objects_report_card(.x, .y))
 
-# Identifying the files that were just moved into the local directory
-file_list <- dir(path = here::here("data/flatfiles/rc_export/"), 
+# # Identifying the files that were just moved into the local directory
+file_list <- dir(path = here::here("data/flatfiles/rc_export/"),
                  pattern = "\\.csv", full.names = TRUE)
 
-# Read and save files from local directory as dataframes (one per school per grade) to a list 
+# Read and save files from local directory as dataframes (one per school per grade) to a list
 grade_df_list <- file_list %>%
   map(read_csv) %>%
   map(clean_names)
 
-# Alternatively:
 # Data frame of data frames
 file_list_short_names <- dir(path = here::here("data/flatfiles/rc_export/"), 
                              pattern = "\\.csv", full.names = FALSE)
