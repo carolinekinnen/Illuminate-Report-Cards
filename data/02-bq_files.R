@@ -91,6 +91,21 @@ students <- get_powerschool("students") %>%
          grade_level) %>%
   collect()
 
+students_ktc <- get_powerschool("students") %>%
+  select(schoolid,
+         student_id = student_number,
+         dob,
+         gender,
+         guardianemail,
+         home_phone,
+         street, 
+         city,
+         state,
+         zip) %>%
+  collect() %>%
+  mutate(address = paste(street, city, state, zip, sep = ", ")) %>%
+  select(-c(street,city, zip, state))
+
 # Get attendance
 attendance <- get_powerschool("attendance") %>%
   filter(att_date >= lubridate::ymd(year_first_day)) %>%

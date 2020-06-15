@@ -224,10 +224,12 @@ quarter_2_final <- grade_df_df[[2]] %>% #grade_df_list %>%
          grade_type = "percent",
          rc_quarter_input = c("Q2"))
 
-quarter_3_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
-  map_df(.f = get_q_grades_pct,
-         grade_type = "percent",
-         rc_quarter_input = c("Q3"))
+# commented out because school closure, quarter 4 has both Q3 and Q3
+
+#quarter_3_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
+  # map_df(.f = get_q_grades_pct,
+  #        grade_type = "percent",
+  #        rc_quarter_input = c("Q3"))
 
 quarter_4_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
   map_df(.f = get_q_grades_pct,

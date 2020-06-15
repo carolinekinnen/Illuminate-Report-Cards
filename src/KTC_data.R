@@ -69,5 +69,151 @@ ktc_students_6th_file <- students_6th %>%
   left_join(schools, by = "schoolid")
   
 
+# --------------------- ### Data needed for 5th-8th ### -------------------
+
+# 19-20 final GPAs (corrected from Illuminate)
+
+final_grades_correct <- read_csv(here::here("output/19-20 Files/grades/Q4 RC Final Grades 2020-06-11.csv")) %>%
+  clean_names() %>%
+  select(student_id,
+         first_name,
+         last_name,
+         grade_level,
+         ela_grade,
+         ela_percent,
+         literacy_centers_grade,
+         literacy_centers_percent,
+         science_grade,
+         science_percent,
+         social_studies_grade,
+         social_studies_percent,
+         math_grade,
+         math_percent,
+         prealg_grade,
+         prealg_percent,
+         alg_grade,
+         alg_percent,
+         gpa)
+
+# DL status
+
+dl_students <- read_csv("~/Dropbox (KIPP Chicago Schools)/Distance_Learning_Analysis/new-project/data/flat_files/dl_students.csv") %>%
+  select(student_id = student_number) %>%
+  mutate(diverse_learner = "Yes")
+
+# emails
+
+email_7 <- read_table2("~/Downloads/student.export - 2020-06-15T151342.561.text") %>%
+  rename(student_id = 1,
+        student_email = 2,
+        student_password = 3)
+
+email_8 <- read_table2("~/Downloads/student.export - 2020-06-15T151816.787.text") %>%
+  rename(student_id = 1,
+         student_email = 2,
+         student_password = 3)
+
+# 5th grade
+## -Spring 2019 Reading and Math percentiles
+## -Absences, tardies, and attendance rate
+## -Final gpa 
+## -Final grades
+
+fifth_ktc_request <- final_grades_correct %>% 
+  filter(grade_level == 5) %>%
+  select(-c(alg_grade, alg_percent, prealg_grade, prealg_percent, social_studies_grade, social_studies_percent)) %>%
+  left_join(attend_school_grade_student_totals %>%
+              select(student_id = student_number,
+                     total_absent,
+                     total_tardy,
+                     rate), by = "student_id") %>%
+  left_join(map_last_spring_pivot, by = "student_id") %>%
+  left_join(students %>% select(student_id = student_number, schoolid), by = "student_id") %>%
+  left_join(schools %>% select(-schoolname), by = "schoolid")
+  
+write_csv(x = fifth_ktc_request, path = here::here("/output/19-20 Files/ktc/Q4_fifth_request.csv"))
+  
+# 6th grade
+## -Spring 2019 Reading and Math percentiles
+## -Absences, tardies, and attendance rate
+## -Final gpa 
+## -Final grades
+
+sixth_ktc_request <- final_grades_correct %>% 
+  filter(grade_level == 6) %>%
+  select(-c(alg_grade, alg_percent, prealg_grade, prealg_percent)) %>%
+  left_join(attend_school_grade_student_totals %>%
+              select(student_id = student_number,
+                     total_absent,
+                     total_tardy,
+                     rate), by = "student_id") %>%
+  left_join(map_last_spring_pivot, by = "student_id") %>%  
+  left_join(students %>% select(student_id = student_number, schoolid), by = "student_id") %>%
+  left_join(schools %>% select(-schoolname), by = "schoolid")
+
+write_csv(x = sixth_ktc_request, path = here::here("/output/19-20 Files/ktc/Q4_sixth_request.csv"))
+
+
+# 7th grade
+## -Spring 2019 Reading and Math percentiles
+## -Absences, tardies, and attendance rate
+## -Final gpa 
+## -Final grades
+## -Student ID
+## -Student DOB
+## -Gender
+## -Home address
+## -Guardian email
+## -Home phone number
+## IEP/504 plan (Y or N)
+## -Student email and password
+
+seventh_ktc_request <- final_grades_correct %>% 
+  filter(grade_level == 7) %>%
+  select(-c(literacy_centers_grade,
+         literacy_centers_percent)) %>%
+  left_join(attend_school_grade_student_totals %>%
+              select(student_id = student_number,
+                     total_absent,
+                     total_tardy,
+                     rate), by = "student_id") %>%
+  left_join(map_last_spring_pivot, by = "student_id") %>%
+  left_join(students_ktc, by = "student_id") %>%
+  left_join(dl_students, by = "student_id") %>%
+  mutate(diverse_learner = case_when(
+    is.na(diverse_learner) ~ "No",
+    TRUE ~ diverse_learner
+  )) %>%
+  left_join(email_7, by = "student_id") %>%
+  left_join(schools %>% select(-schoolname), by = "schoolid")
+
+write_csv(x = seventh_ktc_request, path = here::here("/output/19-20 Files/ktc/Q4_seventh_request.csv"))
+
+  
+
+# 8th grade
+## -Spring 2019 Reading and Math percentiles
+## -Absences, tardies, and attendance rate
+## -Final gpa 
+## -Final grades
+## -Home address
+## -Guardian email
+## -Home phone number
+
+eighth_ktc_request <- final_grades_correct %>% 
+  filter(grade_level == 8) %>%
+  select(-c(literacy_centers_grade,
+            literacy_centers_percent)) %>%
+  left_join(attend_school_grade_student_totals %>%
+              select(student_id = student_number,
+                     total_absent,
+                     total_tardy,
+                     rate), by = "student_id") %>%
+  left_join(map_last_spring_pivot, by = "student_id") %>%
+  left_join(students_ktc, by = "student_id") %>%
+  left_join(email_8, by = "student_id") %>%
+  left_join(schools %>% select(-schoolname), by = "schoolid")
+
+write_csv(x = eighth_ktc_request, path = here::here("/output/19-20 Files/ktc/Q4_eighth_request.csv"))
 
 
