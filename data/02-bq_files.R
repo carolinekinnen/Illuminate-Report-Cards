@@ -41,7 +41,7 @@ sy_abbreviation_last_year <- terms_last_year$abbreviation[1]
 
 # Last day of quarter in which report cards are being generated 
 rc_quarter_table <- terms %>% 
-  filter(abbreviation == identify_quarter(today() - 15)) %>%
+  filter(abbreviation == "Q1") %>% #identify_quarter(today())) %>%
   select(lastday, firstday)
 
 rc_quarter_first_day <- rc_quarter_table$firstday

@@ -91,7 +91,7 @@ get_q_grades_pct <- function(data, grade_type = "grade", rc_quarter_input){
     select(site_id,
            student_id,
            contains(grade_type),
-           -contains("y1_avg")) %>%
+           -contains("y1_avg")) %>% 
     tidyr::gather(rc_field, !!grade_type_eval, -site_id:-student_id) %>%
     mutate(
       # subject0 = gsub("(^.+th_)(\\w.+)(_.+)", "\\2", rc_field),
@@ -121,6 +121,7 @@ get_q_grades_pct <- function(data, grade_type = "grade", rc_quarter_input){
 # necessary after final grades are calculated and uploaded once so GPA will reflect grade modifications
 
 get_yavg_grades <- function(data){
+  
   data %>% 
     select(site_id,
            student_id,
@@ -128,7 +129,7 @@ get_yavg_grades <- function(data){
            -contains("percent")) %>%
     select(site_id, student_id, contains("y1_avg")) %>% 
     tidyr::gather(rc_field, grade, -site_id:-student_id) %>% 
-    mutate(subject = str_extract(rc_field, "math|ela|social|science|art|music|reading|ss|lit_centers|dance|pre_algebra|algebra|pe"),    # have to add new subjects
+    mutate(subject = str_extract(rc_field, "choice_reading|guided_reading|behavior|math|reading|step|homework|science|musical_theater|writing|art|ela|pe|lit_centers|social_studies|explorations|dance|pre_algebra|algebra|physical_education"),    # have to add new subjects
            course_school = toupper(stringr::str_extract(rc_field, "kop|kap|kacp|kac|kbcp|kams|koa"))) %>% 
     select(-c(rc_field)) %>%
     left_join(schools %>% dplyr::rename(site_id = schoolid), by = "site_id") %>% 
@@ -136,7 +137,7 @@ get_yavg_grades <- function(data){
     filter(course_school %in% c("KOP", "KAP", "KACP", "KAC", "KBCP", "KAMS", "KOA")) %>%
     filter(!is.na(grade)) %>%
     mutate(subject = case_when(
-     # subject == "social" ~ "social studies",
+      subject == "social" ~ "social studies",
       subject == "lit_centers" ~ "lit centers",
       TRUE ~ subject
     ))
