@@ -28,28 +28,15 @@ file_list_short_names <- dir(path = here::here("data/flatfiles/rc_export/"),
 grade_df_df <- data_frame(
   file_name = file_list_short_names,
   df = grade_df_list
-)
-
-# ------------------------- ### Pre-Algebra and Algebra Students ### --------------------------------
-# Can be removed after 19-20
-
-gcs_get_object("Illuminate-Report-Cards/prealg_students.csv",
-               saveToDisk = "data/flatfiles/prealg_alg_students/prealg_students.csv",
-               overwrite = TRUE)
-
-gcs_get_object("Illuminate-Report-Cards/alg_students.csv",
-               saveToDisk = "data/flatfiles/prealg_alg_students/alg_students.csv",
-               overwrite = TRUE)
-
-prealg_7 <- read_csv(file = here::here("data/flatfiles/prealg_alg_students/prealg_students.csv"))
-
-alg_8 <- read_csv(file = here::here("data/flatfiles/prealg_alg_students/alg_students.csv"))
+) %>%
+  filter(file_name != "KACP_4.csv") %>%  # removed for 20-21 because grade level no longer exists, not sure why it's still showing up
+  filter(file_name != "KAP_3.csv" & file_name != "KOP_3.csv") # removed for 20-21 because not calculating final grades for 3rd grade in Q1, schools might request it later
 
 
 # ------------------------- ### DL Students with Modified Grading Scale ### --------------------------------
 # Has to be updated once each year
 # Commented out for now because get_y_avg function does not need to know who DL students are
-# testing 19-20 Q3
+# testing 19-20 Q3 and 20-21 Q1
 
 # # KAMS 
 # kams_title <- drive_find("KAMS Modified Grading: 19-20SY", n_max = 30)

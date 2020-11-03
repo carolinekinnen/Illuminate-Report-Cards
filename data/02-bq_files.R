@@ -43,16 +43,11 @@ terms_last_year <- get_powerschool("terms") %>%
 
 sy_abbreviation_last_year <- terms_last_year$abbreviation[1]
 
-<<<<<<< HEAD
 # Last day of quarter in which report cards are being generated
 rc_quarter_table <- terms %>%
   filter(abbreviation == identify_quarter(today() - 15)) %>%
-=======
-# Last day of quarter in which report cards are being generated 
-rc_quarter_table <- terms %>% 
-  filter(abbreviation == "Q1") %>% #identify_quarter(today())) %>%
->>>>>>> 1498ce770a6f46bc17191fc846e108be561570f0
-  select(lastday, firstday)
+  select(lastday, firstday) %>%
+  unique()
 
 rc_quarter_first_day <- rc_quarter_table$firstday[1]
 
@@ -457,62 +452,56 @@ illuminate_teacher_sec <- get_illuminate("section_teacher_aff",
   collect()
 
 # ---------------- ### KOA Report Card Comments - Gradebook Categories ### -----------------------
+# gave up project after COVID but school might request it again
 
-categories <- get_illuminate("categories", schema = "gradebook") %>%
-  select(
-    category_id,
-    category_name,
-    gradebook_id,
-    weight
-  ) %>%
-  collect()
+# categories <- get_illuminate("categories", schema = "gradebook") %>%
+#   select(category_id,
+#          category_name,
+#          gradebook_id,
+#          weight) %>%
+#   collect()
+# 
+# category_score_cache <- get_illuminate("category_score_cache", schema = "gradebook") %>%
+#   select(calculated_at,
+#          timeframe_start_date,
+#          timeframe_end_date,
+#          category_id,
+#          category_name,
+#          gradebook_id,
+#          mark,
+#          percentage,
+#          student_id) %>%
+#   filter(timeframe_start_date == rc_quarter_first_day) %>%
+#   collect()
+# 
+# illuminate_students <- get_illuminate("students", schema = "public") %>%
+#   select(student_id,
+#          first_name,
+#          last_name,
+#          student_number = local_student_id) %>%
+#   collect()
+# 
+# assignments <- get_illuminate("assignments", schema = "gradebook") %>%
+#   select(assignment_id,
+#          category_id,
+#          gradebook_id,
+#          long_name,
+#          short_name,
+#          due_date,
+#          possible_points,
+#          possible_score) %>% 
+#   filter(due_date >= rc_quarter_first_day) %>%
+#   collect()
+# 
+# scores <- get_illuminate("scores", schema = "gradebook") %>%
+#   select(student_id,
+#          score_id,
+#          value,
+#          assignment_id,
+#          gradebook_id,
+#          is_excused,
+#          created) %>%
+#   filter(created >= year_first_day) %>%
+#   collect()
+# 
 
-category_score_cache <- get_illuminate("category_score_cache", schema = "gradebook") %>%
-  select(
-    calculated_at,
-    timeframe_start_date,
-    timeframe_end_date,
-    category_id,
-    category_name,
-    gradebook_id,
-    mark,
-    percentage,
-    student_id
-  ) %>%
-  filter(timeframe_start_date == rc_quarter_first_day) %>%
-  collect()
-
-illuminate_students <- get_illuminate("students", schema = "public") %>%
-  select(student_id,
-    first_name,
-    last_name,
-    student_number = local_student_id
-  ) %>%
-  collect()
-
-assignments <- get_illuminate("assignments", schema = "gradebook") %>%
-  select(
-    assignment_id,
-    category_id,
-    gradebook_id,
-    long_name,
-    short_name,
-    due_date,
-    possible_points,
-    possible_score
-  ) %>%
-  filter(due_date >= rc_quarter_first_day) %>%
-  collect()
-
-scores <- get_illuminate("scores", schema = "gradebook") %>%
-  select(
-    student_id,
-    score_id,
-    value,
-    assignment_id,
-    gradebook_id,
-    is_excused,
-    created
-  ) %>%
-  filter(created >= year_first_day) %>%
-  collect()

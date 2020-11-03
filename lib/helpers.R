@@ -3,10 +3,10 @@
 
 identify_quarter <- function(date) {
   case_when(
-    date >= terms$firstday[1] & date < terms$lastday[4] ~ "Q1",
-    date >= terms$firstday[3] & date < terms$lastday[5] ~ "Q2",
+    date >= terms$firstday[1] & date < terms$lastday[3] ~ "Q1",
+    date >= terms$firstday[10] & date < terms$lastday[5] ~ "Q2",
     date >= terms$firstday[4] & date < terms$lastday[6] ~ "Q3",
-    date >= terms$firstday[5] & date <= terms$lastday[7] ~ "Q4",
+    date >= terms$firstday[12] & date <= terms$lastday[12] ~ "Q4",
     TRUE ~ "not in SY")
 }
 
@@ -39,12 +39,14 @@ get_objects_roster_links <- function(school) {
 
 # ----------------------- ### Read in DL Students from Google Sheets Function ### --------------------
 
-ws <- function(df_title, grade_level){
-  read_sheet(df_title$id,
-             sheet = grade_level) %>%
-    select(2) %>% 
-    janitor::clean_names()
-}
+# shouldn't need in 20-21 because calculate DL students differently. Leaving for future use in case new method doesn't work
+
+# ws <- function(df_title, grade_level){
+#   read_sheet(df_title$id,
+#              sheet = grade_level) %>%
+#     select(2) %>% 
+#     janitor::clean_names()
+# }
 
 # if ws isn't working check that id_number column in Google Sheet only contains integer values, not characters
 
@@ -53,31 +55,33 @@ ws <- function(df_title, grade_level){
 # Fields were named incorrectly - have to contain either "Grade" or "Percent", but these contain both
 # removing so grade and percent function will work
 
-behavior_homework_name_fixer <- function(df, grade, school){
-  grade <- toOrdinal::toOrdinal(as.integer(grade))
-  
-  df_fixed <- df %>%
-    dplyr::rename("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_grade_behavior_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_grade_homework_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_grade_behavior_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_grade_homework_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_grade_behavior_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_grade_homework_percent"),
-           "sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_grade_behavior_percent"),
-          "sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_grade_homework_percent")
-    ) 
-  
-  df_fixed
-}
+# shouldn't need in 20-21 but not sure because not using these subjects. Leaving for future use in case they're re-added
 
-behavior_homework_name_fixer_by_row <- function(input_dataframe, iteration){
-  #grade <- input_dataframe %>% pull(grade)
-  grade <- input_dataframe$grade[[iteration]]
-  #school <- input_dataframe %>% pull(school)
-  school <- input_dataframe$school[[iteration]]
-  data <- input_dataframe$df[[iteration]]
-  behavior_homework_name_fixer(data, grade, school)
-}
+# behavior_homework_name_fixer <- function(df, grade, school){
+#   grade <- toOrdinal::toOrdinal(as.integer(grade))
+#   
+#   df_fixed <- df %>%
+#     dplyr::rename("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_behavior_grade_behavior_percent"),
+#            "sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q1_3_4_homework_grade_homework_percent"),
+#            "sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_behavior_grade_behavior_percent"),
+#            "sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q2_3_4_homework_grade_homework_percent"),
+#            "sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_behavior_grade_behavior_percent"),
+#            "sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q3_3_4_homework_grade_homework_percent"),
+#            "sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_behavior_grade_behavior_percent"),
+#           "sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_homework_percent" := glue::glue("sy19_20_rc_{ school }_{ grade }_q4_3_4_homework_grade_homework_percent")
+#     ) 
+#   
+#   df_fixed
+# }
+# 
+# behavior_homework_name_fixer_by_row <- function(input_dataframe, iteration){
+#   #grade <- input_dataframe %>% pull(grade)
+#   grade <- input_dataframe$grade[[iteration]]
+#   #school <- input_dataframe %>% pull(school)
+#   school <- input_dataframe$school[[iteration]]
+#   data <- input_dataframe$df[[iteration]]
+#   behavior_homework_name_fixer(data, grade, school)
+# }
 
 
 # ----------------------- ### Transform File into Grades Functions ### --------------------
