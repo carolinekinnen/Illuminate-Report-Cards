@@ -78,7 +78,7 @@ attend_school_grade_student <- attend_student %>%
   arrange(schoolabbreviation,
           grade_level)
 
-enrolled_quarter <- str_c("enrolled_", rc_quarter) 
+enrolled_quarter <- str_c("enrolled_", rc_quarter)
 
 # Pivot table so each attendance category and quarter is seperate row , calculate totals
 

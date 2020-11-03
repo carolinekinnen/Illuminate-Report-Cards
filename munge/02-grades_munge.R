@@ -1,5 +1,3 @@
-
-
 # Grades Munge
 # cleaning and transforming files from Illuminate for Illuminate, Deans List, and Powerschool
 
@@ -12,13 +10,13 @@
 # Figure out which lists in the dataframe contain KAP 3, KAP 4, KOP 3, and KOP 4
 
 kap_kop <- grade_df_df %>%
-  filter(str_detect(file_name, "KAP_|KOP_")) %>% 
+  filter(str_detect(file_name, "KAP_|KOP_")) %>%
   mutate(grade = str_extract(file_name, "\\d")) %>%
   mutate(school = tolower(str_extract(file_name, "KAP|KOP")))
 
 # Anti-join to remove original files from grade_df_df
 not_kap_kop <- grade_df_df %>%
-  filter(!str_detect(file_name, "KAP_|KOP_")) 
+  filter(!str_detect(file_name, "KAP_|KOP_"))
 
 # Apply column name fixing function to KAP and KOP
 # Comment out KOP_4 in 20-21 when grade level exists
@@ -28,7 +26,7 @@ kap_kop_fixed <- tribble(
   "KAP_3.csv", behavior_homework_name_fixer_by_row(kap_kop, 1),
   "KAP_4.csv", behavior_homework_name_fixer_by_row(kap_kop, 2),
   "KOP_3.csv", behavior_homework_name_fixer_by_row(kap_kop, 3),
-  #"KOP_4.csv", behavior_homework_name_fixer_by_row(kap_kop, 4) 
+  # "KOP_4.csv", behavior_homework_name_fixer_by_row(kap_kop, 4)
 )
 
 # Bind rows to join back to original dataframe of dataframes
@@ -44,44 +42,56 @@ grade_df_df <- not_kap_kop %>%
 # Figure out which lists in the dataframe contain KBCP 7, 8 and KOA 7, 8
 
 kbcp_koa <- grade_df_df %>%
-  filter(str_detect(file_name, "KBCP_|KOA_")) %>% 
+  filter(str_detect(file_name, "KBCP_|KOA_")) %>%
   mutate(grade = str_extract(file_name, "\\d")) %>%
-  filter(grade %in% c(7,8)) %>%
+  filter(grade %in% c(7, 8)) %>%
   mutate(school = tolower(str_extract(file_name, "KBCP|KOA")))
 
 # Anti-join to remove original files from grade_df_df
 not_kbcp_koa <- grade_df_df %>%
   mutate(grade = str_extract(file_name, "\\d")) %>%
   filter(file_name != "KBCP_7.csv" & file_name != "KBCP_8.csv" & file_name != "KOA_7.csv" & file_name != "KOA_8.csv")
-           
+
 # KOA 7 - Pre-Algebra
 
 koa_7 <- kbcp_koa[[2]][[3]]
 
 koa_7_prealg <- koa_7 %>%
-  filter(site_id == 400180,
-         !is.na(sy19_20_rc_koa_7th_q2_pre_algebra_pre_algebra_grade)) %>%
-  mutate(sy19_20_rc_koa_7th_q1_pre_algebra_pre_algebra_grade = sy19_20_rc_koa_7th_q1_math_math_grade,
-         sy19_20_rc_koa_7th_q1_pre_algebra_pre_algebra_percent = sy19_20_rc_koa_7th_q1_math_math_percent) %>%
-  mutate(sy19_20_rc_koa_7th_q1_math_math_grade = NA,
-         sy19_20_rc_koa_7th_q1_math_math_percent = NA)
+  filter(
+    site_id == 400180,
+    !is.na(sy19_20_rc_koa_7th_q2_pre_algebra_pre_algebra_grade)
+  ) %>%
+  mutate(
+    sy19_20_rc_koa_7th_q1_pre_algebra_pre_algebra_grade = sy19_20_rc_koa_7th_q1_math_math_grade,
+    sy19_20_rc_koa_7th_q1_pre_algebra_pre_algebra_percent = sy19_20_rc_koa_7th_q1_math_math_percent
+  ) %>%
+  mutate(
+    sy19_20_rc_koa_7th_q1_math_math_grade = NA,
+    sy19_20_rc_koa_7th_q1_math_math_percent = NA
+  )
 
 koa_7 <- koa_7 %>%
-  anti_join(koa_7_prealg, by = "student_id")  # remove them all from grade_df_list then do bind so won't be duplicates
+  anti_join(koa_7_prealg, by = "student_id") # remove them all from grade_df_list then do bind so won't be duplicates
 
-kbcp_koa[[2]][[3]] <- bind_rows(koa_7_prealg, koa_7) 
+kbcp_koa[[2]][[3]] <- bind_rows(koa_7_prealg, koa_7)
 
 # KOA 8 - Algebra
 
 koa_8 <- kbcp_koa[[2]][[4]]
 
 koa_8_alg <- koa_8 %>%
-  filter(site_id == 400180,
-         !is.na(sy19_20_rc_koa_8th_q2_algebra_algebra_grade)) %>%
-  mutate(sy19_20_rc_koa_8th_q1_algebra_algebra_grade = sy19_20_rc_koa_8th_q1_math_math_grade,
-         sy19_20_rc_koa_8th_q1_algebra_algebra_percent = sy19_20_rc_koa_8th_q1_math_math_percent) %>%
-  mutate(sy19_20_rc_koa_8th_q1_math_math_grade = NA,
-         sy19_20_rc_koa_8th_q1_math_math_percent = NA)
+  filter(
+    site_id == 400180,
+    !is.na(sy19_20_rc_koa_8th_q2_algebra_algebra_grade)
+  ) %>%
+  mutate(
+    sy19_20_rc_koa_8th_q1_algebra_algebra_grade = sy19_20_rc_koa_8th_q1_math_math_grade,
+    sy19_20_rc_koa_8th_q1_algebra_algebra_percent = sy19_20_rc_koa_8th_q1_math_math_percent
+  ) %>%
+  mutate(
+    sy19_20_rc_koa_8th_q1_math_math_grade = NA,
+    sy19_20_rc_koa_8th_q1_math_math_percent = NA
+  )
 
 koa_8 <- koa_8 %>%
   anti_join(koa_8_alg, by = "student_id")
@@ -93,36 +103,50 @@ kbcp_koa[[2]][[4]] <- bind_rows(koa_8_alg, koa_8)
 kbcp_7 <- kbcp_koa[[2]][[1]]
 
 kbcp_7_prealg <- kbcp_7 %>%
-  filter(site_id == 400163, 
-         !is.na(sy19_20_rc_kbcp_7th_q2_pre_algebra_pre_algebra_grade)) %>%
-  mutate(sy19_20_rc_kbcp_7th_q1_pre_algebra_pre_algebra_grade = sy19_20_rc_kbcp_7th_q1_math_math_grade,
-         sy19_20_rc_kbcp_7th_q1_pre_algebra_pre_algebra_percent = sy19_20_rc_kbcp_7th_q1_math_math_percent) %>%
-  mutate(sy19_20_rc_kbcp_7th_q1_math_math_grade = NA,
-         sy19_20_rc_kbcp_7th_q1_math_math_percent = NA) 
+  filter(
+    site_id == 400163,
+    !is.na(sy19_20_rc_kbcp_7th_q2_pre_algebra_pre_algebra_grade)
+  ) %>%
+  mutate(
+    sy19_20_rc_kbcp_7th_q1_pre_algebra_pre_algebra_grade = sy19_20_rc_kbcp_7th_q1_math_math_grade,
+    sy19_20_rc_kbcp_7th_q1_pre_algebra_pre_algebra_percent = sy19_20_rc_kbcp_7th_q1_math_math_percent
+  ) %>%
+  mutate(
+    sy19_20_rc_kbcp_7th_q1_math_math_grade = NA,
+    sy19_20_rc_kbcp_7th_q1_math_math_percent = NA
+  )
 
 kbcp_7 <- kbcp_7 %>%
   anti_join(kbcp_7_prealg, by = "student_id") %>%
-  
-  # Field group course name spelled incorrectly in Illuminate, has to be corrected to match up with subject 
-  dplyr::rename(sy19_20_rc_kbcp_7th_q1_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q1_course_math_course_name_pre_agebra,
-                sy19_20_rc_kbcp_7th_q2_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q2_course_math_course_name_pre_agebra,
-                sy19_20_rc_kbcp_7th_q3_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q3_course_math_course_name_pre_agebra,
-                sy19_20_rc_kbcp_7th_q4_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q4_course_math_course_name_pre_agebra)
+
+  # Field group course name spelled incorrectly in Illuminate, has to be corrected to match up with subject
+  dplyr::rename(
+    sy19_20_rc_kbcp_7th_q1_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q1_course_math_course_name_pre_agebra,
+    sy19_20_rc_kbcp_7th_q2_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q2_course_math_course_name_pre_agebra,
+    sy19_20_rc_kbcp_7th_q3_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q3_course_math_course_name_pre_agebra,
+    sy19_20_rc_kbcp_7th_q4_course_math_course_name_pre_algebra = sy19_20_rc_kbcp_7th_q4_course_math_course_name_pre_agebra
+  )
 
 kbcp_koa[[2]][[1]] <- bind_rows(kbcp_7_prealg, kbcp_7)
 
 
 # KBCP 8 - Algebra
 
-kbcp_8 <- kbcp_koa[[2]][[2]] 
+kbcp_8 <- kbcp_koa[[2]][[2]]
 
 kbcp_8_alg <- kbcp_8 %>%
-  filter(site_id == 400163,
-         !is.na(sy19_20_rc_kbcp_8th_q2_algebra_algebra_grade)) %>%
-  mutate(sy19_20_rc_kbcp_8th_q1_algebra_algebra_grade = sy19_20_rc_kbcp_8th_q1_math_math_grade,
-         sy19_20_rc_kbcp_8th_q1_algebra_algebra_percent = sy19_20_rc_kbcp_8th_q1_math_math_percent) %>%
-  mutate(sy19_20_rc_kbcp_8th_q1_math_math_grade = NA,
-         sy19_20_rc_kbcp_8th_q1_math_math_percent = NA)
+  filter(
+    site_id == 400163,
+    !is.na(sy19_20_rc_kbcp_8th_q2_algebra_algebra_grade)
+  ) %>%
+  mutate(
+    sy19_20_rc_kbcp_8th_q1_algebra_algebra_grade = sy19_20_rc_kbcp_8th_q1_math_math_grade,
+    sy19_20_rc_kbcp_8th_q1_algebra_algebra_percent = sy19_20_rc_kbcp_8th_q1_math_math_percent
+  ) %>%
+  mutate(
+    sy19_20_rc_kbcp_8th_q1_math_math_grade = NA,
+    sy19_20_rc_kbcp_8th_q1_math_math_percent = NA
+  )
 
 kbcp_8 <- kbcp_8 %>%
   anti_join(kbcp_8_alg, by = "student_id")
@@ -137,18 +161,20 @@ grade_df_df <- not_kbcp_koa %>%
 #-------------------------- ### Course Names for Grades 4-8 ###----------------------------------
 
 course_names <- course_names_teachers %>%
-  select(site_id = schoolid,
-         student_id = student_number, 
-         course_long_name,
-         course_number) %>%
+  select(
+    site_id = schoolid,
+    student_id = student_number,
+    course_long_name,
+    course_number
+  ) %>%
   left_join(student_schools, by = "student_id") %>%
   mutate(store_code = rc_quarter) %>%
   dplyr::rename(course_school = schoolabbreviation) %>%
   mutate(subject = tolower(str_sub(course_long_name, start = 5))) %>%
-  #filter(!grepl("behavior|choice reading|explorations|homework|musical theater|visual arts", subject)) %>%
+  # filter(!grepl("behavior|choice reading|explorations|homework|musical theater|visual arts", subject)) %>%
   mutate(subject = case_when(
-    subject == "english language arts" ~ "ela", 
-    subject == "literacy centers" ~ "lit centers", 
+    subject == "english language arts" ~ "ela",
+    subject == "literacy centers" ~ "lit centers",
     subject == "mathematics" ~ "math",
     subject == "pre-algebra" ~ "pre_algebra",
     subject == "physical education" ~ "pe",
@@ -159,87 +185,107 @@ course_names <- course_names_teachers %>%
 
 #-------------------------- ### Current Quarter Report Card Data for Powerschool and Deans List and Retention Data and KTC ###----------------------------------
 
-rc_letter_grades <- grade_df_df[[2]] %>% #grade_df_list %>% 
-  map_df(.f = get_q_grades_pct,
-         grade_type = "grade",
-         rc_quarter_input = rc_quarter
-           ) %>% 
+rc_letter_grades <- grade_df_df[[2]] %>% # grade_df_list %>%
+  map_df(
+    .f = get_q_grades_pct,
+    grade_type = "grade",
+    rc_quarter_input = rc_quarter
+  ) %>%
   left_join(student_schools,
-            by = "student_id") %>% 
-  filter(course_school == schoolabbreviation)  %>%
+    by = "student_id"
+  ) %>%
+  filter(course_school == schoolabbreviation) %>%
   select(-c(ps_schoolid, schoolname, schoolabbreviation))
 
-rc_percent <- grade_df_df[[2]] %>% #grade_df_list %>% 
-  map_df(.f = get_q_grades_pct,
-         grade_type = "percent",
-         rc_quarter_input = rc_quarter
-         ) %>% 
+rc_percent <- grade_df_df[[2]] %>% # grade_df_list %>%
+  map_df(
+    .f = get_q_grades_pct,
+    grade_type = "percent",
+    rc_quarter_input = rc_quarter
+  ) %>%
   left_join(student_schools,
-            by = "student_id") %>% 
-  filter(course_school == schoolabbreviation)  %>%
+    by = "student_id"
+  ) %>%
+  filter(course_school == schoolabbreviation) %>%
   select(-c(ps_schoolid, schoolname, schoolabbreviation))
 
-quarter_grades <-rc_letter_grades %>%
-  # left_join(course_names_teachers, #course_names, 
+quarter_grades <- rc_letter_grades %>%
+  # left_join(course_names_teachers, #course_names,
   #           by = c("student_id",
   #                  "store_code",
   #                  "course_school",
   #                  "site_id",
   #                  "subject")) %>%
   left_join(rc_percent,
-            by = c("student_id",
-                   "store_code",
-                   "course_school",
-                   "site_id", 
-                   "subject")) %>% 
+    by = c(
+      "student_id",
+      "store_code",
+      "course_school",
+      "site_id",
+      "subject"
+    )
+  ) %>%
   mutate(percent = as.double(gsub("%", "", percent))) %>%
   left_join(students %>%
-              select(student_id = student_number, grade_level, first_name, last_name), by = "student_id")
+    select(student_id = student_number, grade_level, first_name, last_name), by = "student_id")
 
 quarter_grades_pivot_wide <- quarter_grades %>%
-  select(student_id,
-         #store_code,
-         subject,
-         grade, 
-         percent) %>%
-  group_by(subject,
-          # student_id,
-           ) %>%
- # mutate(row = row_number()) %>%
-  pivot_wider(names_from = c(subject), 
-              values_from = c(grade, percent)) #%>%
-  #select(-row)
+  select(
+    student_id,
+    # store_code,
+    subject,
+    grade,
+    percent
+  ) %>%
+  group_by(
+    subject,
+    # student_id,
+  ) %>%
+  # mutate(row = row_number()) %>%
+  pivot_wider(
+    names_from = c(subject),
+    values_from = c(grade, percent)
+  ) # %>%
+# select(-row)
 
 # ----------------------------- ### Year Average Percentage for Powerschool and Illuminate ### --------------
 
 # Run all quarters seperately then bind rows because setting rc_quarter_input = c("Q1", "Q2", "Q3", "Q4") was dropping subjects
 
-quarter_1_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
-  map_df(.f = get_q_grades_pct,
-         grade_type = "percent",
-         rc_quarter_input = c("Q1"))
+quarter_1_final <- grade_df_df[[2]] %>% # grade_df_list %>%
+  map_df(
+    .f = get_q_grades_pct,
+    grade_type = "percent",
+    rc_quarter_input = c("Q1")
+  )
 
-quarter_2_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
-  map_df(.f = get_q_grades_pct,
-         grade_type = "percent",
-         rc_quarter_input = c("Q2"))
+quarter_2_final <- grade_df_df[[2]] %>% # grade_df_list %>%
+  map_df(
+    .f = get_q_grades_pct,
+    grade_type = "percent",
+    rc_quarter_input = c("Q2")
+  )
 
 # commented out because school closure, quarter 4 has both Q3 and Q3
 
-#quarter_3_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
-  # map_df(.f = get_q_grades_pct,
-  #        grade_type = "percent",
-  #        rc_quarter_input = c("Q3"))
+# quarter_3_final <- grade_df_df[[2]] %>% #grade_df_list %>%
+# map_df(.f = get_q_grades_pct,
+#        grade_type = "percent",
+#        rc_quarter_input = c("Q3"))
 
-quarter_4_final <- grade_df_df[[2]] %>% #grade_df_list %>% 
-  map_df(.f = get_q_grades_pct,
-         grade_type = "percent",
-         rc_quarter_input = c("Q4")) 
+quarter_4_final <- grade_df_df[[2]] %>% # grade_df_list %>%
+  map_df(
+    .f = get_q_grades_pct,
+    grade_type = "percent",
+    rc_quarter_input = c("Q4")
+  )
 
 all_quarter_percents <- quarter_1_final %>%
-  bind_rows(quarter_2_final, #quarter_3_final, 
-            quarter_4_final) %>%
-  mutate(percent = as.double(str_extract(percent, "[[:digit:]]+"))) 
+  bind_rows(
+    quarter_2_final, # quarter_3_final,
+    quarter_4_final
+  ) %>%
+  mutate(percent = as.double(str_extract(percent, "[[:digit:]]+")))
 
 final_percents <- all_quarter_percents %>%
   dplyr::group_by(site_id, student_id, subject) %>%
@@ -251,24 +297,22 @@ final_percents <- all_quarter_percents %>%
 
 # ----------------------------- ### Year Average Grades for Powerschool and Illuminate ### --------------
 
-# At first, calculate final grades from the final percentages availalble above. 
+# At first, calculate final grades from the final percentages availalble above.
 # Upload information to Illuminate where it will stay for most students
 
-# After that, use get_yavg_grades function to select letter grades for all students from 
+# After that, use get_yavg_grades function to select letter grades for all students from
 # report card export so grade modifications done in Illuminate will be reflected
 
-if(calculated_type == "first_upload") {
+if (calculated_type == "first_upload") {
   final_grades <- final_percents %>%
     mutate(percent = as.character(round(percent, 1))) %>%
-    left_join(grade_percent_scale %>% 
-                mutate(percent = as.character(percent)),
-              by = "percent") %>%
+    left_join(grade_percent_scale %>%
+      mutate(percent = as.character(percent)),
+    by = "percent"
+    ) %>%
     select(-percent)
 } else {
-  final_grades <- grade_df_list %>% #grade_df_list_rm_prim %>% 
+  final_grades <- grade_df_list %>% # grade_df_list_rm_prim %>%
     map_df(.f = get_yavg_grades) %>%
     select(site_id, student_id, subject, grade)
 }
-
-
-

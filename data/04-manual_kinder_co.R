@@ -6,16 +6,12 @@
 users_names <- users %>%
   mutate(teacher_full_name = str_c(first_name, last_name, sep = " ")) %>%
   mutate(teacher_full_name = case_when(
-    teacher_full_name == "Alison Suranovic" ~ "Alison Suranovic/Richarda Bloom",
-    teacher_full_name == "Claire Grossheim" ~ "Claire Grossheim/Victoria Jones", 
-    teacher_full_name == "Danielle Stuckey" ~ "Danielle Stuckey/Darnell Dixon", 
-    teacher_full_name == "Margaret Leiby" ~ "Margaret Leiby/Pariz Robinson",
-    teacher_full_name == "LA Ellis" ~ "LA Ellis/Bryanna Ross",
-    teacher_full_name == "Alejandra Vazquez" ~ "Alejandra Vazquez/April Hudson",
-    teacher_full_name == "Kelley Logan" ~ "Kelley Logan/Jillian Lindenberg",
-    teacher_full_name == "Kelli Gardner" ~ "Kelli Gardner/Jasmine Washington",
-    teacher_full_name == "Fabiola Rosado" ~ "Fabiola Rosado/Theresa Pickett",
-    teacher_full_name == "Noa Parker" ~ "Noa Parker/Francesca Varias",
-    teacher_full_name == "Emily Lemick" ~ "Emily Lemick/Jackie Roman",
+    teacher_full_name == "Alison Suranovic" ~ "Alison Suranovic/Ciera Jamison",
+    teacher_full_name == "Victoria Jones" ~ "Victoria Jones/Ricarda Bloom", 
+    teacher_full_name == "Kynadi Gray" ~ "Kynadi Gray/Danielle Stuckey", 
+    teacher_full_name == "Briana Hasan" ~ "Briana Hasan/Emily Schwartz",
+    teacher_full_name == "Kelley Logan" ~ "Kelley Logan/Jasmine Washington",
+    teacher_full_name == "April Hudson" ~ "April Hudson/Suzana Arambula",
+    teacher_full_name == "Cassaundra Parker" ~ "Cassaundra Parker/Theresa Pickett",
     TRUE ~ teacher_full_name
   ))

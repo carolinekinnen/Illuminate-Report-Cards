@@ -32,7 +32,7 @@ write.csv(quarter_number %>%
 middle_course_teacher <- course_names_teachers_final %>%
   mutate_all(funs(replace(., is.na(.), "")))
 
-middle_course_teacher_file <- sprintf(paste0("output/19-20 Files/course_teacher/middle_course_teacher_name_",
+middle_course_teacher_file <- sprintf(paste0("output/20-21/course_teacher/middle_course_teacher_name_",
                                              rc_quarter,
                                              "_%s.csv"),
                                       today())
@@ -44,7 +44,7 @@ write.csv(middle_course_teacher %>%
 
 # Primary
 
-primary_course_teacher_file_name <- sprintf(paste0("output/19-20 Files/course_teacher/primary_course_teacher_name_",
+primary_course_teacher_file_name <- sprintf(paste0("output/20-21/course_teacher/primary_course_teacher_name_",
                                               rc_quarter,
                                               "_%s.csv"),
                                        today())
@@ -54,7 +54,7 @@ write.csv(primary_course_teacher %>%
           file = here::here(primary_course_teacher_file_name), 
           row.names = FALSE)
 
-primary_course_teacher_3_file_name <- sprintf(paste0("output/19-20 Files/course_teacher/primary_course_teacher_3_name_",
+primary_course_teacher_3_file_name <- sprintf(paste0("output/20-21/course_teacher/primary_course_teacher_3_name_",
                                                      rc_quarter,
                                                      "_%s.csv"),
                                               today())

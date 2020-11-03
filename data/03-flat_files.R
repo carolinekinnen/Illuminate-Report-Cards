@@ -133,5 +133,5 @@ last_year_attendance <- read.csv(paste0(here::here(), "/output/",
                                  
 
 
-
+cc <- read_csv(here::here("data", "flatfiles", "cc.csv"))
 
