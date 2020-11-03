@@ -113,10 +113,29 @@ final_grades_gpa_illuminate_upload <- final_grades_gpa_illuminate_upload %>%
          `prealg percent` = percent_pre_algebra,
          `alg grade` = grade_algebra,
          `alg percent` = percent_algebra,
-         gpa = cumulative_gpa)
+         gpa = cumulative_gpa,
+         `behavior percent` = percent_behavior,
+         `behavior grade` = grade_behavior,
+         `explorations grade` = grade_explorations,
+         `explorations percent` = percent_explorations,
+         `homework grade` = grade_homework,
+         `homework percent` = percent_homework,
+         `theater/perform grade` = grade_musical_theater,
+         `theater/perform percent` = percent_musical_theater,
+         `choice grade` = grade_choice_reading,
+         `choice percent` = percent_choice_reading,
+         `step grade` = grade_guided_reading,
+         `step percent` = percent_guided_reading,
+         `writing grade` = grade_writing,
+         `writing percent` = percent_writing)
 
 write.csv(final_grades_gpa_illuminate_upload %>%
           as.data.frame(),
+          file = here::here(final_grades_file),
+          row.names = FALSE)
+
+write.csv(final_grades_gpa_illuminate_upload_edit %>%
+            as.data.frame(),
           file = here::here(final_grades_file),
           row.names = FALSE)
 

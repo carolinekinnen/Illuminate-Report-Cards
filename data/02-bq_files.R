@@ -43,9 +43,15 @@ terms_last_year <- get_powerschool("terms") %>%
 
 sy_abbreviation_last_year <- terms_last_year$abbreviation[1]
 
+<<<<<<< HEAD
 # Last day of quarter in which report cards are being generated
 rc_quarter_table <- terms %>%
   filter(abbreviation == identify_quarter(today() - 15)) %>%
+=======
+# Last day of quarter in which report cards are being generated 
+rc_quarter_table <- terms %>% 
+  filter(abbreviation == "Q1") %>% #identify_quarter(today())) %>%
+>>>>>>> 1498ce770a6f46bc17191fc846e108be561570f0
   select(lastday, firstday)
 
 rc_quarter_first_day <- rc_quarter_table$firstday[1]
