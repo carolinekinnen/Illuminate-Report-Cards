@@ -8,3 +8,4 @@
 *.png
 cache
 .httr-oauth
+.DS_Store
