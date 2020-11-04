@@ -93,10 +93,10 @@ final_grades_file <- sprintf(paste0("output/",
 
 # rename columns for easy update to Illuminate
 final_grades_gpa_illuminate_upload <- final_grades_gpa_illuminate_upload %>%
-  rename(`art grade` = grade_art,
-         `art percent` = percent_art,
-         `dance grade` = grade_dance,
-         `dance percent` = percent_dance,
+  select(
+         `art percent` = 0,
+         `dance grade` = 0,
+         `dance percent` = 0,
          `ela grade` = grade_ela,
          `ela percent` = percent_ela,
          `literacy centers grade` = grade_lit_centers,
@@ -105,8 +105,8 @@ final_grades_gpa_illuminate_upload <- final_grades_gpa_illuminate_upload %>%
          `pe percent` = percent_pe,
          `science grade` = grade_science,
          `science percent` = percent_science,
-         `social studies grade` = grade_social,
-         `social studies percent` = percent_social,
+         `social studies grade` = 0,
+         `social studies percent` = 0,
          `math grade` = grade_math,
          `math percent` = percent_math,
          `prealg grade` = grade_pre_algebra,
@@ -114,20 +114,20 @@ final_grades_gpa_illuminate_upload <- final_grades_gpa_illuminate_upload %>%
          `alg grade` = grade_algebra,
          `alg percent` = percent_algebra,
          gpa = cumulative_gpa,
-         `behavior percent` = percent_behavior,
-         `behavior grade` = grade_behavior,
-         `explorations grade` = grade_explorations,
-         `explorations percent` = percent_explorations,
-         `homework grade` = grade_homework,
-         `homework percent` = percent_homework,
-         `theater/perform grade` = grade_musical_theater,
-         `theater/perform percent` = percent_musical_theater,
-         `choice grade` = grade_choice_reading,
-         `choice percent` = percent_choice_reading,
-         `step grade` = grade_guided_reading,
-         `step percent` = percent_guided_reading,
-         `writing grade` = grade_writing,
-         `writing percent` = percent_writing)
+         `behavior percent` = 0,
+         `behavior grade` = 0,
+         `explorations grade` = 0,
+         `explorations percent` = 0,
+         `homework grade` = 0,
+         `homework percent` = 0,
+         `theater/perform grade` = 0,
+         `theater/perform percent` = 0,
+         `choice grade` = 0,
+         `choice percent` = 0,
+         `step grade` = 0,
+         `step percent` = 0,
+         `writing grade` = 0,
+         `writing percent` = 0)
 
 write.csv(final_grades_gpa_illuminate_upload %>%
           as.data.frame(),
@@ -187,7 +187,7 @@ write.csv(dl_upload_kac %>%
           file = dl_upload_file_name_input("KAC"),
           row.names = FALSE)
 
-write.csv(dl_upload_kams %>%
+cwrite.csv(dl_upload_kams %>%
             as.data.frame(),
           file = dl_upload_file_name_input("KAMS"),
           row.names = FALSE)

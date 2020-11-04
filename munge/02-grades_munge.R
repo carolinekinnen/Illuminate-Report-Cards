@@ -8,19 +8,19 @@
 # removing so grade and percent function will work
 
 # Figure out which lists in the dataframe contain KAP 3, KAP 4, KOP 3, and KOP 4
-# 
+#
 # kap_kop <- grade_df_df %>%
 #   filter(str_detect(file_name, "KAP_|KOP_")) %>%
 #   mutate(grade = str_extract(file_name, "\\d")) %>%
 #   mutate(school = tolower(str_extract(file_name, "KAP|KOP")))
-# 
+#
 # # Anti-join to remove original files from grade_df_df
 # not_kap_kop <- grade_df_df %>%
 #   filter(!str_detect(file_name, "KAP_|KOP_"))
-# 
+#
 # # Apply column name fixing function to KAP and KOP
 # # Comment out KOP_4 in 20-21 when grade level exists
-# 
+#
 # kap_kop_fixed <- tribble(
 #   ~file_name, ~df,
 #   "KAP_3.csv", behavior_homework_name_fixer_by_row(kap_kop, 1),
@@ -28,7 +28,7 @@
 #   "KOP_3.csv", behavior_homework_name_fixer_by_row(kap_kop, 3),
 #   # "KOP_4.csv", behavior_homework_name_fixer_by_row(kap_kop, 4)
 # )
-# 
+#
 # # Bind rows to join back to original dataframe of dataframes
 # grade_df_df <- not_kap_kop %>%
 #   bind_rows(kap_kop_fixed)
@@ -92,37 +92,45 @@ quarter_grades <- rc_letter_grades %>%
   #                 #"store_code",
   #                "course_school",
   #                 "site_id",
-  #                 "subject")) %>% 
+  #                 "subject")) %>%
   # not working with courses, can't remember where this was used
   left_join(rc_percent,
-            by = c("student_id",
-                   "store_code",
-                   "course_school",
-                   "site_id", 
-                   "subject")) %>% 
+    by = c(
+      "student_id",
+      "store_code",
+      "course_school",
+      "site_id",
+      "subject"
+    )
+  ) %>%
   mutate(percent = as.double(gsub("%", "", percent))) %>%
   left_join(students %>%
-              select(student_id = student_number, first_name, last_name), by = "student_id") %>%
+    select(student_id = student_number, first_name, last_name, grade_level), by = "student_id") %>%
   filter(grade_level > 3)
 
 quarter_grades_pivot_wide <- quarter_grades %>%
-  select(student_id,
-         #store_code,
-         subject,
-         grade, 
-         percent) %>%
-  group_by(subject,
-           # student_id,
+  select(
+    student_id,
+    # store_code,
+    subject,
+    grade,
+    percent
+  ) %>%
+  group_by(
+    subject,
+    # student_id,
   ) %>%
   # mutate(row = row_number()) %>%
-  pivot_wider(names_from = subject,
-              values_from = c(grade, percent)) %>%
-  unnest(cols = c(grade_ela, `grade_lit centers`, grade_math, grade_science, 
-                  grade_social, grade_art, grade_explorations, grade_pe, grade_homework, 
-                  grade_dance, grade_pre_algebra, grade_algebra, percent_ela, 
-                  `percent_lit centers`, percent_math, percent_science, percent_social, 
-                  percent_art, percent_explorations, percent_pe, percent_homework, 
-                  percent_dance, percent_pre_algebra, percent_algebra))
+  pivot_wider(
+    names_from = subject,
+    values_from = c(grade, percent)
+  ) %>%
+  unnest(cols = c(
+    grade_ela, `grade_lit centers`, grade_math, grade_science,
+    grade_social, grade_pe, grade_pre_algebra, grade_algebra, percent_ela,
+    `percent_lit centers`, percent_math, percent_science, percent_social, percent_pe,
+    percent_pre_algebra, percent_algebra
+  ))
 
 
 # ----------------------------- ### Year Average Percentage for Powerschool and Illuminate ### --------------
@@ -198,5 +206,3 @@ if (calculated_type == "first_upload") {
     map_df(.f = get_yavg_grades) %>%
     select(site_id, student_id, subject, grade)
 }
-
-

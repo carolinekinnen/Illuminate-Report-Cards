@@ -12,57 +12,6 @@ course_names_teachers <- users_names %>%
   # joins users and teachers
   ) %>% 
   left_join(cc,
-<<<<<<< HEAD
-    by = "teacherid"
-  ) %>%
-  
-  # joins users/teachers and cc
-  filter(termid == ps_termid) %>% 
-  left_join(courses,
-    by = "course_number"
-  ) %>% 
-  
-  # joins users/teachers/cc and courses
-  select(c(
-    schoolid,
-    studentid,
-    course_long_name,
-    first_name,
-    last_name,
-    teacher_full_name,
-    course_number,
-    section_number
-  )) %>%
-  
-  # joins users/teachers/cc/courses and students
-  left_join(students %>% 
-    select(student_number,
-      studentid = id,
-      grade_level,
-      home_room,
-      student_first = first_name,
-      student_last = last_name
-    ),
-  by = "studentid"
-  ) %>%
-  filter(
-    !grepl("Attendance|ELL", course_long_name),
-    grade_level > 3
-  ) %>%
-  mutate(
-    course_long_name = gsub("ELA", "English Language Arts", course_long_name),
-    course_long_name = if_else(grepl("(\\d)th Math", course_long_name) &
-      !grepl("Mathematics", course_long_name),
-    gsub("Math", "Mathematics", course_long_name), course_long_name
-    ),
-    course_long_name = if_else(grepl("(\\d)th Literacy Center", course_long_name) &
-      !grepl("Literacy Centers", course_long_name),
-    gsub("Literacy Center", "Literacy Centers", course_long_name), course_long_name
-    ),
-    subject = gsub("(\\d)th ", "", course_long_name)
-  ) %>%
-  select(-c(section_number, first_name, last_name))
-=======
             by = "teacherid") %>% 
  # filter(termid == ps_termid) %>% # joins users/teachers and cc
   left_join(courses,
@@ -105,7 +54,6 @@ course_names_teachers <- users_names %>%
     subject == "social studies" ~ "social",
     TRUE ~ subject
   ))
->>>>>>> 1498ce770a6f46bc17191fc846e108be561570f0
 
 # Connect students table from Powerschool with manual schools table
 student_schools <- students_powerschool_transcripts %>%

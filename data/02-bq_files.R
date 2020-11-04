@@ -88,15 +88,28 @@ termname_map_last_spring <- paste0("Spring ", current_first_year - 1, "-", curre
 
 ## Powerschool ##
 
+students <- get_powerschool("students") %>%
+  select(
+    id,
+    schoolid,
+    student_number,
+    first_name,
+    last_name,
+    home_room,
+    enroll_status,
+    grade_level
+  ) %>%
+  collect()
+
 students_remote <- get_powerschool("students") %>%
   select(student_number,
-         studentid = id,
-         enroll_status,
-         grade_level,
-         home_room,
-         schoolid,
-         first_name,
-         last_name,
+    studentid = id,
+    enroll_status,
+    grade_level,
+    home_room,
+    schoolid,
+    first_name,
+    last_name,
   ) %>%
 
   # filter for currently enrolled students
@@ -132,12 +145,12 @@ attendance_code_remote <-
 membership_remote <-
   get_powerschool("ps_membership_reg") %>%
   select(studentid,
-         schoolid,
-         date = calendardate,
-         membership = studentmembership,
-         grade_level,
-         attendance = ATT_CalcCntPresentAbsent,
-         yearid
+    schoolid,
+    date = calendardate,
+    membership = studentmembership,
+    grade_level,
+    attendance = ATT_CalcCntPresentAbsent,
+    yearid
   ) %>%
   collect() %>%
   select(-c(
@@ -234,7 +247,7 @@ teachers <- get_powerschool("schoolstaff") %>%
 #     sectionid
 #   ) %>%
 #   collect()
-# 
+#
 # cc_powerschool_transcript <- get_powerschool("cc") %>%
 #   collect()
 
@@ -367,6 +380,7 @@ schools_grades <- students %>%
 schools_map <- schools_grades %>%
   pull(schoolabbreviation) %>%
   as.character()
+
 grades_map <- schools_grades %>% pull(grade_level)
 
 
@@ -460,7 +474,7 @@ illuminate_teacher_sec <- get_illuminate("section_teacher_aff",
 #          gradebook_id,
 #          weight) %>%
 #   collect()
-# 
+#
 # category_score_cache <- get_illuminate("category_score_cache", schema = "gradebook") %>%
 #   select(calculated_at,
 #          timeframe_start_date,
@@ -473,14 +487,14 @@ illuminate_teacher_sec <- get_illuminate("section_teacher_aff",
 #          student_id) %>%
 #   filter(timeframe_start_date == rc_quarter_first_day) %>%
 #   collect()
-# 
+#
 # illuminate_students <- get_illuminate("students", schema = "public") %>%
 #   select(student_id,
 #          first_name,
 #          last_name,
 #          student_number = local_student_id) %>%
 #   collect()
-# 
+#
 # assignments <- get_illuminate("assignments", schema = "gradebook") %>%
 #   select(assignment_id,
 #          category_id,
@@ -489,10 +503,10 @@ illuminate_teacher_sec <- get_illuminate("section_teacher_aff",
 #          short_name,
 #          due_date,
 #          possible_points,
-#          possible_score) %>% 
+#          possible_score) %>%
 #   filter(due_date >= rc_quarter_first_day) %>%
 #   collect()
-# 
+#
 # scores <- get_illuminate("scores", schema = "gradebook") %>%
 #   select(student_id,
 #          score_id,
@@ -503,5 +517,4 @@ illuminate_teacher_sec <- get_illuminate("section_teacher_aff",
 #          created) %>%
 #   filter(created >= year_first_day) %>%
 #   collect()
-# 
-
+#

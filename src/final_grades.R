@@ -52,7 +52,7 @@ quarter_gpa <- quarter_grades %>%
 cumulative_gpa <- final_grades %>% 
   left_join(grade_scale, by = "grade") %>%
   group_by(site_id, student_id) %>%
-  summarize(cumulative_gpa = round2(mean(points, na.rm = TRUE), digits = 2)) 
+  summarize(cumulative_gpa = round2(mean(points, na.rm = TRUE), digits = 2))
 
 # --------------------------------- ### Combine into One File ### -------------------------------
 
