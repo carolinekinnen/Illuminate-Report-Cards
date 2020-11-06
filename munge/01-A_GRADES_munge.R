@@ -1,39 +1,79 @@
 # Grades Munge
 # cleaning and transforming files from Illuminate for Illuminate, Deans List, and Powerschool
 
-#-------------------------- ### Illuminate Report Card Data for Powerschool and Deans List ###----------------------------------
-# Old - shouldn't need in 20-21 because no longer using these subjects but leaving just in case
-# Fixing Homework and Behavior Grade/Percent Problem
-# Fields were named incorrectly - have to contain either "Grade" or "Percent", but these contain both
-# removing so grade and percent function will work
+# Course Names for Grades 4-8 ---------------------------------------------
 
-# Figure out which lists in the dataframe contain KAP 3, KAP 4, KOP 3, and KOP 4
-#
-# kap_kop <- grade_df_df %>%
-#   filter(str_detect(file_name, "KAP_|KOP_")) %>%
-#   mutate(grade = str_extract(file_name, "\\d")) %>%
-#   mutate(school = tolower(str_extract(file_name, "KAP|KOP")))
-#
-# # Anti-join to remove original files from grade_df_df
-# not_kap_kop <- grade_df_df %>%
-#   filter(!str_detect(file_name, "KAP_|KOP_"))
-#
-# # Apply column name fixing function to KAP and KOP
-# # Comment out KOP_4 in 20-21 when grade level exists
-#
-# kap_kop_fixed <- tribble(
-#   ~file_name, ~df,
-#   "KAP_3.csv", behavior_homework_name_fixer_by_row(kap_kop, 1),
-#   "KAP_4.csv", behavior_homework_name_fixer_by_row(kap_kop, 2),
-#   "KOP_3.csv", behavior_homework_name_fixer_by_row(kap_kop, 3),
-#   # "KOP_4.csv", behavior_homework_name_fixer_by_row(kap_kop, 4)
-# )
-#
-# # Bind rows to join back to original dataframe of dataframes
-# grade_df_df <- not_kap_kop %>%
-#   bind_rows(kap_kop_fixed)
+course_names_teachers <- users_names %>%
+  left_join(teachers,
+    by = "users_dcid"
 
-#-------------------------- ### Course Names for Grades 4-8 ###----------------------------------
+    # joins users and teachers
+  ) %>%
+  left_join(cc,
+    by = "teacherid"
+  ) %>%
+  # filter(termid == ps_termid) %>% # joins users/teachers and cc
+  left_join(courses,
+    by = "course_number"
+  ) %>% # joins users/teachers/cc and courses
+  select(c(
+    schoolid,
+    studentid,
+    course_long_name,
+    first_name,
+    last_name,
+    teacher_full_name,
+    course_number,
+    section_number
+  )) %>%
+  left_join(students %>% # joins users/teachers/cc/courses and students
+    select(student_number,
+      studentid = id,
+      grade_level,
+      home_room,
+      student_first = first_name,
+      student_last = last_name
+    ),
+  by = "studentid"
+  ) %>%
+  filter(
+    !grepl("Attendance|ELL", course_long_name),
+    grade_level > 2
+  ) %>%
+  mutate(
+    course_long_name = gsub("ELA", "English Language Arts", course_long_name),
+    course_long_name = if_else(grepl("(\\d)th Math", course_long_name) &
+      !grepl("Mathematics", course_long_name),
+    gsub("Math", "Mathematics", course_long_name), course_long_name
+    ),
+    course_long_name = if_else(grepl("(\\d)th Literacy Center", course_long_name) &
+      !grepl("Literacy Centers", course_long_name),
+    gsub("Literacy Center", "Literacy Centers", course_long_name), course_long_name
+    ),
+    subject = gsub("(\\d)th ", "", course_long_name)
+  ) %>%
+  select(-c(section_number, first_name, last_name)) %>%
+  left_join(schools, by = "schoolid") %>%
+  mutate(subject = tolower(subject)) %>%
+  mutate(subject = case_when(
+    subject == "english language arts" ~ "ela",
+    subject == "literacy centers" ~ "lit centers",
+    subject == "mathematics" ~ "math",
+    subject == "physical education" ~ "pe",
+    subject == "pre-algebra" ~ "pre_algebra",
+    subject == "social studies" ~ "social",
+    TRUE ~ subject
+  ))
+
+# Connect students table from Powerschool with manual schools table
+student_schools <- students_powerschool_transcripts %>%
+  select(
+    ps_schoolid,
+    student_id
+  ) %>%
+  left_join(schools,
+            by = c("ps_schoolid" = "schoolid")
+  )
 
 course_names <- course_names_teachers %>%
   select(
@@ -58,7 +98,8 @@ course_names <- course_names_teachers %>%
     TRUE ~ subject
   ))
 
-#-------------------------- ### Current Quarter Report Card Data for Powerschool and Deans List and Retention Data and KTC ###----------------------------------
+
+# Current Quarter Report Card Data for Powerschool and Deans List  --------
 
 rc_letter_grades <- grade_df_df[[2]] %>% # grade_df_list %>%
   map_df(
@@ -133,7 +174,8 @@ quarter_grades_pivot_wide <- quarter_grades %>%
   ))
 
 
-# ----------------------------- ### Year Average Percentage for Powerschool and Illuminate ### --------------
+
+# Year Average Percentage for Powerschool and Illuminate ------------------
 
 # Run all quarters seperately then bind rows because setting rc_quarter_input = c("Q1", "Q2", "Q3", "Q4") was dropping subjects
 
@@ -185,7 +227,9 @@ final_percents <- all_quarter_percents %>%
     TRUE ~ subject
   ))
 
-# ----------------------------- ### Year Average Grades for Powerschool and Illuminate ### --------------
+
+# Year Average Grades for Powerschool and Illuminate ----------------------
+
 
 # At first, calculate final grades from the final percentages availalble above.
 # Upload information to Illuminate where it will stay for most students
@@ -193,16 +237,16 @@ final_percents <- all_quarter_percents %>%
 # After that, use get_yavg_grades function to select letter grades for all students from
 # report card export so grade modifications done in Illuminate will be reflected
 
-if (calculated_type == "first_upload") {
-  final_grades <- final_percents %>%
-    mutate(percent = as.character(round(percent, 1))) %>%
-    left_join(grade_percent_scale %>%
-      mutate(percent = as.character(percent)),
-    by = "percent"
-    ) %>%
-    select(-percent)
-} else {
-  final_grades <- grade_df_list %>% # grade_df_list_rm_prim %>%
-    map_df(.f = get_yavg_grades) %>%
-    select(site_id, student_id, subject, grade)
-}
+# if (calculated_type == "first_upload") {
+#   final_grades <- final_percents %>%
+#     mutate(percent = as.character(round(percent, 1))) %>%
+#     left_join(grade_percent_scale %>%
+#       mutate(percent = as.character(percent)),
+#     by = "percent"
+#     ) %>%
+#     select(-percent)
+# } else {
+#   final_grades <- grade_df_list %>% # grade_df_list_rm_prim %>%
+#     map_df(.f = get_yavg_grades) %>%
+#     select(site_id, student_id, subject, grade)
+# }
