@@ -93,10 +93,7 @@ final_grades_file <- sprintf(paste0("output/",
 
 # rename columns for easy update to Illuminate
 final_grades_gpa_illuminate_upload <- final_grades_gpa_illuminate_upload %>%
-  select(
-         `art percent` = 0,
-         `dance grade` = 0,
-         `dance percent` = 0,
+  rename(
          `ela grade` = grade_ela,
          `ela percent` = percent_ela,
          `literacy centers grade` = grade_lit_centers,
@@ -105,8 +102,8 @@ final_grades_gpa_illuminate_upload <- final_grades_gpa_illuminate_upload %>%
          `pe percent` = percent_pe,
          `science grade` = grade_science,
          `science percent` = percent_science,
-         `social studies grade` = 0,
-         `social studies percent` = 0,
+         `social studies grade` = grade_social_studies,
+         `social studies percent` = percent_social_studies,
          `math grade` = grade_math,
          `math percent` = percent_math,
          `prealg grade` = grade_pre_algebra,
@@ -114,28 +111,23 @@ final_grades_gpa_illuminate_upload <- final_grades_gpa_illuminate_upload %>%
          `alg grade` = grade_algebra,
          `alg percent` = percent_algebra,
          gpa = cumulative_gpa,
-         `behavior percent` = 0,
-         `behavior grade` = 0,
-         `explorations grade` = 0,
-         `explorations percent` = 0,
-         `homework grade` = 0,
-         `homework percent` = 0,
-         `theater/perform grade` = 0,
-         `theater/perform percent` = 0,
-         `choice grade` = 0,
-         `choice percent` = 0,
-         `step grade` = 0,
-         `step percent` = 0,
-         `writing grade` = 0,
-         `writing percent` = 0)
+         # `homework grade` = 0,
+         # `homework percent` = 0,
+         # `theater/perform grade` = 0,
+         # `theater/perform percent` = 0,
+         # `choice grade` = 0,
+         # `choice percent` = 0,
+         # `step grade` = 0,
+         # `step percent` = 0,
+         # `writing grade` = 0,
+         # `writing percent` = 0
+         ) %>%
+  mutate(
+    across(everything(), ~replace_na(.x, ""))
+  )
 
 write.csv(final_grades_gpa_illuminate_upload %>%
           as.data.frame(),
-          file = here::here(final_grades_file),
-          row.names = FALSE)
-
-write.csv(final_grades_gpa_illuminate_upload_edit %>%
-            as.data.frame(),
           file = here::here(final_grades_file),
           row.names = FALSE)
 

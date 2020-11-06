@@ -74,19 +74,19 @@ grade_df_df <- data_frame(
 # Has to be updated once each year OR if new gradebooks are added
 # Only KAC, KACP, KAMS, KBCP, and KOA need to have updated final quarter grades on Deans List
 
-map(.x = c("KAC", "KACP", "KAMS", "KBCP", "KOA"),
-    .f = get_objects_roster_links)
-
-# Gradebook names that link subjects to grades, needs to be downloaded from Deans List
-sis_roster_links <- dir(path = here::here("data/flatfiles/DL_roster_links"), 
-                        pattern = "19-20_roster_links", full.names = TRUE)
-
-dl_rosters <- sis_roster_links %>%
-  map_df(read_csv) %>%
-  clean_names() %>% 
-  filter(!is.na(gradebook_name_at_load)) %>% 
-  select(sec_id = secondary_integration_id_at_load,
-         gb_name = gradebook_name_at_load)
+# map(.x = c("KAC", "KACP", "KAMS", "KBCP", "KOA"),
+#     .f = get_objects_roster_links)
+# 
+# # Gradebook names that link subjects to grades, needs to be downloaded from Deans List
+# sis_roster_links <- dir(path = here::here("data/flatfiles/DL_roster_links"), 
+#                         pattern = "19-20_roster_links", full.names = TRUE)
+# 
+# dl_rosters <- sis_roster_links %>%
+#   map_df(read_csv) %>%
+#   clean_names() %>% 
+#   filter(!is.na(gradebook_name_at_load)) %>% 
+#   select(sec_id = secondary_integration_id_at_load,
+#          gb_name = gradebook_name_at_load)
 
 #----------------- ### Attendance and Final Grade Data from Last Year ###-------------------
 # KTC needs grade and attendance data from 5th grade for current 6th graders
@@ -111,11 +111,11 @@ last_year_grades <- read.csv(paste0(here::here(), "/output/",
 #                                     ".csv"))
 # only has GPAs, need letter grades
 
-last_year_attendance <- read.csv(paste0(here::here(), "/output/",
-                                        sy_abbreviation_last_year,
-                                        " Files/attendance/SY",
-                                        sy_abbreviation_last_year,
-                                        " Q4 RC Attendance 2019-07-16.csv"))
+# last_year_attendance <- read.csv(paste0(here::here(), "/output/",
+#                                         sy_abbreviation_last_year,
+#                                         " Files/attendance/SY",
+#                                         sy_abbreviation_last_year,
+#                                         " Q4 RC Attendance 2019-07-16.csv"))
 # date will need to change for SY 20-21
                                  
 

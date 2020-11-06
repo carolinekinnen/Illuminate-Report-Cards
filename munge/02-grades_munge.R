@@ -175,10 +175,10 @@ all_quarter_percents <- quarter_1_final %>%
 final_percents <- all_quarter_percents %>%
   dplyr::group_by(site_id, student_id, subject) %>%
   summarize(percent = mean(percent)) %>%
-  mutate(percent = case_when(
-    percent < 70 ~ 70,
-    TRUE ~ percent
-  )) %>%
+  # mutate(percent = case_when(
+  #   percent < 70 ~ 70,
+  #   TRUE ~ percent
+  # )) %>%
   mutate(percent = round(percent, 0)) %>%
   mutate(subject = case_when(
     subject == "social" ~ "social_studies",
