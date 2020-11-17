@@ -1,9 +1,4 @@
 
-# library('ProjectTemplate')
-# load.project()
-
-
-
 # --------------------- ### Courses and Teachers - Middle ###--------------------------
 
 teacher_subject <- course_names_teachers %>%
@@ -41,17 +36,18 @@ course_names_teachers_final <- course_subject %>%
   ) %>%
   select(-home_room.y) %>%
   dplyr::rename(home_room = home_room.x) %>%
+  janitor::clean_names() %>%
   mutate(
-    prealgebra_spanish = if_else(is.na(`Pre-Algebra_course`), `Pre-Algebra_course`, "Pre-álgebra"),
-    math_spanish = if_else(is.na(`Mathematics_course`), `Mathematics_course`, "Matemáticas"),
-    algebra_spanish = if_else(is.na(`Algebra_course`), `Algebra_course`, "Álgebra"),
-    ela_spanish = if_else(is.na(`English Language Arts_course`), `English Language Arts_course`, "Literatura"), 
-    lit_center_spanish = if_else(is.na(`Literacy Centers_course`), `Literacy Centers_course`, "Centros de Alfabetización"), 
-    science_spanish = if_else(is.na(Science_course), Science_course, "Ciencias"), 
-    ss_spanish = if_else(is.na(`Social Studies_course`), `Social Studies_course`, "Ciencias sociales"), 
+    prealgebra_spanish = if_else(is.na(`pre_algebra_course`), `pre_algebra_course`, "Pre-álgebra"),
+    math_spanish = if_else(is.na(`math_course`), `math_course`, "Matemáticas"),
+    algebra_spanish = if_else(is.na(`algebra_course`), `algebra_course`, "Álgebra"),
+    ela_spanish = if_else(is.na(`English Language Arts_course`), `English Language Arts_course`, "Literatura"),
+    lit_center_spanish = if_else(is.na(`Literacy Centers_course`), `Literacy Centers_course`, "Centros de Alfabetización"),
+    science_spanish = if_else(is.na(Science_course), Science_course, "Ciencias"),
+    ss_spanish = if_else(is.na(`Social Studies_course`), `Social Studies_course`, "Ciencias sociales"),
     pe_spanish = if_else(is.na(`Physical Education_course`), `Physical Education_course`, "Educación Física"),
     explorations_spanish = if_else(is.na(Explorations_course), Explorations_course, "Exploraciones")
-  ) %>% 
+  ) %>%
   mutate(kap4_hr_teacher = case_when(
     home_room == "4th University of Wisconsin" ~ "Kate Ray",
     home_room == "4th Berkeley" ~ "Ashley McNulty",

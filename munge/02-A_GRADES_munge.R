@@ -101,7 +101,7 @@ course_names <- course_names_teachers %>%
 
 # Current Quarter Report Card Data for Powerschool and Deans List  --------
 
-rc_letter_grades <- grade_df_df[[2]] %>% # grade_df_list %>%
+rc_letter_grades <- grade_df_df[[2]]%>% # grade_df_list %>%
   map_df(
     .f = get_q_grades_pct,
     grade_type = "grade",
@@ -167,10 +167,22 @@ quarter_grades_pivot_wide <- quarter_grades %>%
     values_from = c(grade, percent)
   ) %>%
   unnest(cols = c(
-    grade_ela, `grade_lit centers`, grade_math, grade_science,
-    grade_social, grade_pe, grade_pre_algebra, grade_algebra, percent_ela,
-    `percent_lit centers`, percent_math, percent_science, percent_social, percent_pe,
-    percent_pre_algebra, percent_algebra
+    grade_ela, 
+    # `grade_lit centers`, 
+    grade_math, 
+    grade_science,
+    grade_social, 
+    grade_pe,
+    grade_pre_algebra,
+    grade_algebra,
+    percent_ela,
+    `percent_lit centers`,
+    percent_math, 
+    percent_science, 
+    percent_social, 
+    percent_pe,
+    percent_pre_algebra,
+    percent_algebra
   ))
 
 
@@ -215,38 +227,10 @@ all_quarter_percents <- quarter_1_final %>%
   mutate(percent = as.double(str_extract(percent, "[[:digit:]]+")))
 
 final_percents <- all_quarter_percents %>%
-  dplyr::group_by(site_id, student_id, subject) %>%
+  dplyr::group_by(site_id, student_id, subject, store_code) %>%
   summarize(percent = mean(percent)) %>%
-  # mutate(percent = case_when(
-  #   percent < 70 ~ 70,
-  #   TRUE ~ percent
-  # )) %>%
   mutate(percent = round(percent, 0)) %>%
   mutate(subject = case_when(
     subject == "social" ~ "social_studies",
     TRUE ~ subject
   ))
-
-
-# Year Average Grades for Powerschool and Illuminate ----------------------
-
-
-# At first, calculate final grades from the final percentages availalble above.
-# Upload information to Illuminate where it will stay for most students
-
-# After that, use get_yavg_grades function to select letter grades for all students from
-# report card export so grade modifications done in Illuminate will be reflected
-
-# if (calculated_type == "first_upload") {
-#   final_grades <- final_percents %>%
-#     mutate(percent = as.character(round(percent, 1))) %>%
-#     left_join(grade_percent_scale %>%
-#       mutate(percent = as.character(percent)),
-#     by = "percent"
-#     ) %>%
-#     select(-percent)
-# } else {
-#   final_grades <- grade_df_list %>% # grade_df_list_rm_prim %>%
-#     map_df(.f = get_yavg_grades) %>%
-#     select(site_id, student_id, subject, grade)
-# }

@@ -1,17 +1,25 @@
 
+# Parameters --------------------------------------------------------------
+
+QUARTER <- "Q1"
+
+
 # --------------------------------------- ### Final Grades ### --------------------------------
 
-# final_grades <- final_percents %>%
-#   mutate(percent = paste0(as.character(round(percent, 0)), "%")) %>%
-#   left_join(final_grades, by = c("student_id", "subject", "site_id")) %>%
-#   select(site_id, student_id, grade, subject)
-# 
-# 
-# final_percent_grades <- final_percents %>%
-#   mutate(percent = paste0(as.character(round(percent, 0)), "%")) %>%
-#   left_join(final_grades, by = c("student_id", "subject", "site_id")) %>%
-#   pivot_wider(names_from = subject, values_from = c(percent, grade)) %>%
-#   janitor::clean_names()
+original_letter_grades_dl <- 
+  quarter_grades_pivot_wide %>%
+  filter(student_id %in% dl_mod_grades_students$student_id) %>%
+  select(student_id, 
+         grade_ela_mod = grade_ela,
+         `grade_lit centers_mod` = `grade_lit centers`,
+         grade_math_mod = grade_math,
+         grade_science_mod = grade_science,
+         grade_social_mod = grade_social,
+         grade_algebra_mod = grade_algebra,
+         grade_pe_mod = grade_pe,
+         grade_pre_algebra_mod = grade_pre_algebra
+         )
+
 
 final_grades <- final_percents %>%
   mutate(percent = as.character(round(percent, 1))) %>%
@@ -23,7 +31,43 @@ final_grades <- final_percents %>%
 final_percent_grades <- final_grades %>%
   mutate(percent = paste0(as.character(percent), "%")) %>%
   pivot_wider(names_from = subject, values_from = c(percent, grade)) %>%
+  left_join(original_letter_grades_dl,
+    by = "student_id"
+  ) %>%
+  mutate(
+    grade_ela = if_else(grade_ela == grade_ela_mod | is.na(grade_ela_mod), grade_ela, grade_ela_mod),
+    grade_math = if_else(grade_math == grade_math_mod | is.na(grade_math_mod), grade_math, grade_math_mod),
+    `grade_lit centers` = if_else(`grade_lit centers` == `grade_lit centers_mod` | is.na(`grade_lit centers_mod`),
+      `grade_lit centers`, `grade_lit centers_mod`
+    ),
+    grade_science = if_else(grade_science == grade_science_mod | is.na(grade_science_mod), grade_science, grade_science_mod),
+    grade_social_studies = if_else(grade_social_studies == grade_social_mod | is.na(grade_social_mod),
+      grade_social_studies, grade_social_mod
+    ),
+    grade_algebra = if_else(grade_algebra == grade_algebra_mod | is.na(grade_algebra_mod), grade_algebra, grade_algebra_mod),
+    grade_pe = if_else(grade_pe == grade_pe_mod | is.na(grade_pe_mod), grade_pe, grade_pe_mod),
+    grade_pre_algebra = if_else(grade_pre_algebra == grade_pre_algebra_mod | is.na(grade_pre_algebra_mod),
+      grade_pre_algebra, grade_pre_algebra_mod
+    )
+  ) %>%
+  select(-c(
+    site_id,
+    grade_ela_mod,
+    `grade_lit centers_mod`,
+    grade_math_mod,
+    grade_science_mod,
+    grade_social_mod,
+    grade_algebra_mod,
+    grade_pe_mod,
+    grade_pre_algebra_mod
+  )) %>%
   janitor::clean_names()
+
+# final_percent_grades %>%
+#   pivot_longer(cols = percent_ela:grade_pre_algebra, 
+#                names_to = "subject", values_to = "percent", 
+#                values_drop_na = TRUE) %>% View()
+  
 
 # --------------------------------------- ### Quarter GPAs ### --------------------------------
 
@@ -32,7 +76,7 @@ quarter_gpa <- quarter_grades %>%
     percent == "90%" ~ "A-",
     percent == "80%" ~ "B-",
     percent == "70%" ~ "C-",
-    percent == "60%" ~ "D-",     #
+    percent == "60%" ~ "D-",
     TRUE ~ grade
   )) %>%
   # filter(site_id == ps_schoolid) %>%
@@ -75,29 +119,10 @@ final_grades_gpa_illuminate_upload <- final_percent_grades %>%
     gpa = cumulative_gpa,
   ) %>%
   mutate(
+    gpa = quarter_gpa,
     across(everything(), ~replace_na(.x, ""))
-  )
+  ) %>% 
+  filter(store_code == QUARTER)
 
 
-# Rename Columns ----------------------------------------------------------
 
-
-# final_grades_gpa_illuminate_upload %>% 
-#   ungroup() %>%
-#   select(student_id, percent_algebra, grade_algebra) %>%
-#   mutate(grade_pct_match = case_when(
-#     grade_algebra == "A+" & percent_algebra >= 98 ~ TRUE, 
-#     grade_algebra == "A" & between(percent_algebra, 94.0, 97.9) ~ TRUE, 
-#     grade_algebra == "A-" & between(percent_algebra, 90.0, 93.9) ~ TRUE, 
-#     grade_algebra == "B+" & between(percent_algebra, 87.0, 89.9) ~ TRUE, 
-#     grade_algebra == "B" & between(percent_algebra, 83.0, 86.9) ~ TRUE, 
-#     grade_algebra == "B-" & between(percent_algebra, 80.0, 82.9) ~ TRUE, 
-#     grade_algebra == "C+" & between(percent_algebra, 77.0, 79.9) ~ TRUE, 
-#     grade_algebra == "C" & between(percent_algebra, 73.0, 76.9) ~ TRUE, 
-#     grade_algebra == "C-" & between(percent_algebra, 70.0, 72.9) ~ TRUE, 
-#     grade_algebra == "D+" & between(percent_algebra, 67.0, 69.9) ~ TRUE, 
-#     grade_algebra == "D" & between(percent_algebra, 63.0, 66.9) ~ TRUE, 
-#     grade_algebra == "D-" & between(percent_algebra, 60.0, 62.9) ~ TRUE, 
-#     grade_algebra == "F" & between(percent_algebra, 0, 59.9) ~ TRUE, 
-#     TRUE ~ FALSE
-#   )) %>% filter(grade_pct_match == FALSE) %>% View()

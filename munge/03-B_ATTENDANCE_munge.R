@@ -1,13 +1,11 @@
 
-library(data.table)
-library(mltools)
 # Parameters --------------------------------------------------------------
 
 SY_2021 <- silounloadr::calc_academic_year(ymd("2020-08-24"), format = "firstyear")
 
 # Output: 2020
 CURRENT_FIRST_YEAR <- calc_academic_year(lubridate::today(),
-                                         format = "first_year"
+  format = "first_year"
 )
 
 # Output: 3000
@@ -18,51 +16,78 @@ PS_YEARID_2021 <-
   str_extract("\\d{2}") %>%
   as.integer()
 
+current_first_year <- calc_academic_year(lubridate::today(),
+  format = "first_year"
+)
+
+ps_termid <- calc_ps_termid(current_first_year)
+
+terms <- get_powerschool("terms") %>%
+  filter(id >= ps_termid) %>%
+  select(
+    id,
+    abbreviation,
+    firstday,
+    lastday
+  ) %>%
+  collect() %>%
+  unique() %>%
+  arrange(id)
+
+rc_quarter_table <- terms %>%
+  filter(abbreviation == identify_quarter(today() - 15)) %>%
+  select(lastday, firstday) %>%
+  unique()
+
+rc_quarter <- identify_quarter(today() - 15)
+
+rc_quarter_first_day <- rc_quarter_table$firstday[1]
+
+rc_quarter_last_day <- rc_quarter_table$lastday[1]
 
 # Daily Attendance - Data Table Munging -----------------------------------
 
 student_daily_attendance <-
-  
+
   # this table includes only days where students where not first marked as present
   attendance_remote %>%
-  
+
   # filter to current school year
   filter(behavior_date >= ymd("2020-08-24")) %>%
   mutate(behavior = trimws(behavior, which = "both")) %>%
-  
   left_join(students_remote %>%
-              # set column types
-              mutate(
-                student_number = as.character(student_number),
-                schoolid = as.character(schoolid)
-              ),
-            by = "student_number"
+    # set column types
+    mutate(
+      student_number = as.character(student_number),
+      schoolid = as.character(schoolid)
+    ),
+  by = "student_number"
   ) %>%
-  
+
   # this table ensures that each student has a row for each day they were enrolled in school.
   # because attendance table only records "special circumstances", membership table is needed
   # to figure out all days students were present.
-  left_join(membership_remote,
-            by = c(
-              "studentid" = "studentid",
-              "behavior_date" = "date"
-            )
+  left_join(membership_remote %>% filter(date >= ymd("2020-08-24")),
+    by = c(
+      "studentid" = "studentid",
+      "behavior_date" = "date"
+    )
   ) %>%
   left_join(attendance_code_full,
-            by = "behavior"
+    by = "behavior"
   ) %>%
   mutate(attendance = as.factor(attendance)) %>%
-  
+
   # filter to current school year
   filter(yearid == 30) %>%
-  
+
   # filter out students who were DNA (students who signed up but never came to school)
-  
+
   as.data.table() %>%
   one_hot() %>%
   # filter(`attendance_Did Not Arrive` != 1) %>%
   left_join(school_id_table,
-            by = "schoolid"
+    by = "schoolid"
   ) %>%
   rename(school_abbr = abbr) %>%
   mutate(
@@ -74,7 +99,7 @@ student_daily_attendance <-
     behavior_date = ymd(behavior_date),
     membership = as.numeric(membership)
   ) %>%
-  
+
   # reorder columns
   select(
     student_number,
@@ -95,20 +120,16 @@ student_daily_attendance <-
     `attendance_Did Not Arrive`,
     attendance_Hospital
   ) %>%
-  distinct()
+  distinct() %>%
+  mutate(membership = if_else(att_code == "D", 0, membership))
 
 
-# [1] "schoolabbreviation" "grade_level"       
-# [3] "student_number"     "first_name"        
-# [5] "last_name"          "quarter"           
-# [7] "enrolled"           "present"           
-# [9] "absent"             "tardy" 
 
 #------------------------ ### Summarize Table ###-------------------------------------
 
 
 attend_school_grade_student <- student_daily_attendance %>%
-  filter(behavior_date <= rc_quarter_last_day) %>% 
+  filter(behavior_date <= rc_quarter_last_day) %>%
   group_by(
     student_number,
     student_last_name,
@@ -126,13 +147,17 @@ attend_school_grade_student <- student_daily_attendance %>%
     `Present (Total)` = (`Present (Remote)` + `Academic Contact`),
     ADA = round((`Present (Total)` / `Days Enrolled (From First Day Present)`) * 100, 2)
   ) %>%
-  rename(enrolled = `Days Enrolled (From First Day Present)`,
-         present = `Present (Total)`,
-         absent = `Absences (Total)`) %>%
+  rename(
+    enrolled = `Days Enrolled (From First Day Present)`,
+    present = `Present (Total)`,
+    absent = `Absences (Total)`
+  ) %>%
   mutate(quarter = "Q1") %>%
-  select(school_abbr, grade_level, student_number, student_first_name, 
-         student_last_name, quarter, enrolled, present, 
-         absent)
+  select(
+    school_abbr, grade_level, student_number, student_first_name,
+    student_last_name, quarter, enrolled, present,
+    absent
+  )
 
 
 enrolled_quarter <- str_c("enrolled_", rc_quarter)
@@ -142,7 +167,11 @@ enrolled_quarter <- str_c("enrolled_", rc_quarter)
 attend_school_grade_student_totals <- attend_school_grade_student %>%
   pivot_wider(names_from = quarter, values_from = c(enrolled, present, absent)) %>%
   ungroup() %>%
-  mutate(total_absent = rowSums(.[grep("absent", names(.))], na.rm = TRUE),
-         total_present = rowSums(.[grep("present", names(.))], na.rm = TRUE),
-         total_enrolled = rowSums(.[grep("enrolled", names(.))], na.rm = TRUE), 
-         rate = paste0(round(total_present/total_enrolled * 100, 1), "%"))
+  mutate(
+    total_absent = rowSums(.[grep("absent", names(.))], na.rm = TRUE),
+    total_present = rowSums(.[grep("present", names(.))], na.rm = TRUE),
+    total_enrolled = rowSums(.[grep("enrolled", names(.))], na.rm = TRUE),
+    tardy_Q1 = NA,
+    total_tardy = NA,
+    rate = paste0(round(total_present / total_enrolled * 100, 1), "%")
+  )

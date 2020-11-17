@@ -46,3 +46,12 @@ grade_df_df <- tibble(
 
 # this file should be pulled from bq
 cc <- read_csv(here::here("data", "flatfiles", "cc.csv"))
+
+gcs_get_object("Illuminate-Report-Cards/DL_roster_links/2021_q1_modified_grade_scale_students.csv",
+                 saveToDisk = "data/flatfiles/2021_q1_modified_grade_scale_students.csv",
+                 overwrite = TRUE
+  )
+
+dl_mod_grades_students <-
+  read_csv(here::here("data", "flatfiles", "2021_q1_modified_grade_scale_students.csv"))
+
