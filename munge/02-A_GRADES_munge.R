@@ -98,7 +98,6 @@ course_names <- course_names_teachers %>%
     TRUE ~ subject
   ))
 
-
 # Current Quarter Report Card Data for Powerschool and Deans List  --------
 
 rc_letter_grades <- grade_df_df[[2]]%>% # grade_df_list %>%
@@ -126,14 +125,16 @@ rc_percent <- grade_df_df[[2]] %>% # grade_df_list %>%
   select(-c(ps_schoolid, schoolname, schoolabbreviation))
 
 quarter_grades <- rc_letter_grades %>%
-  # left_join(course_names_teachers %>% rename(student_id = student_number,
-  #                                            course_school = schoolabbreviation,
-  #                                            site_id = schoolid) %>% filter(!str_detect(subject, "3rd")),
-  #          by = c("student_id",
-  #                 #"store_code",
-  #                "course_school",
-  #                 "site_id",
-  #                 "subject")) %>%
+  # not working 
+  left_join(course_names_teachers %>% rename(student_id = student_number,
+                                             course_school = schoolabbreviation,
+                                             site_id = schoolid) %>% filter(!str_detect(subject, "3rd")) %>%
+              select(-grade_level),
+           by = c("student_id",
+                  # "store_code",
+                 "course_school",
+                  "site_id",
+                  "subject")) %>%
   # not working with courses, can't remember where this was used
   left_join(rc_percent,
     by = c(

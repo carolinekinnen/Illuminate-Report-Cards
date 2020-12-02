@@ -179,7 +179,7 @@ write.csv(dl_upload_kac %>%
           file = dl_upload_file_name_input("KAC"),
           row.names = FALSE)
 
-cwrite.csv(dl_upload_kams %>%
+write.csv(dl_upload_kams %>%
             as.data.frame(),
           file = dl_upload_file_name_input("KAMS"),
           row.names = FALSE)

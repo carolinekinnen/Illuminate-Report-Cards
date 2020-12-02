@@ -41,6 +41,11 @@ grade_df_df <- tibble(
   filter(file_name != "KAP_3.csv" & file_name != "KOP_3.csv")
 
 
+dl_gradebook <- 
+  read_csv(here::here("data", "flatfiles", 
+                      "DL_roster_links", 
+                      "20-21_dl_roster_gb_name.csv"))
+
 
 # Temporary fix for courses file ------------------------------------------
 

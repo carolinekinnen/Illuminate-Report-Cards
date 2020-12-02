@@ -10,12 +10,29 @@ Sys.getenv("BQ_AUTH_FILE")
 googleAuthR::gar_auth_service("/usr/local/etc/gcs/kipp-chicago-silo-2-3789ce3e3415.json")
 gcs_global_bucket("idea_remote_attendance_dashboard")
 
+
+# SINGLE MANUAL TABLE -----------------------------------------------------
+
+# School table
+schools <- tibble(
+  schoolid = c(
+    78102, 7810, 400146, 4001462, 400163,
+    4001802, 400180, 4001632
+  ),
+  schoolname = c(
+    "Ascend Primary", "Ascend Middle", "Academy Chicago",
+    "Academy Chicago Primary", "Bloom", "One Primary",
+    "One Academy", "Bloom Primary"
+  ),
+  schoolabbreviation = c("KAP", "KAMS", "KAC", "KACP", "KBCP", "KOP", "KOA", "KBP")
+)
+
 #-------------------------- ### Parameters ### ----------------------------------------
 
 # find School Year and Term ID to filter large attendance tables
 sy <- calc_academic_year(today(), format = "firstyear")
 
-current_first_year <- calc_academic_year(lubridate::today(),
+current_first_year <- calc_academic_year(lubridate::ymd("2020-10-30"), # erase
   format = "first_year"
 )
 
@@ -55,7 +72,7 @@ sy_abbreviation_last_year <- terms_last_year$abbreviation[1]
 
 # Last day of quarter in which report cards are being generated
 rc_quarter_table <- terms %>%
-  filter(abbreviation == identify_quarter(today() - 15)) %>%
+  filter(abbreviation == identify_quarter(ymd("2020-10-30") - 15)) %>% # erase
   select(lastday, firstday) %>%
   unique()
 
@@ -63,7 +80,7 @@ rc_quarter_first_day <- rc_quarter_table$firstday[1]
 
 rc_quarter_last_day <- rc_quarter_table$lastday[1]
 
-rc_quarter <- identify_quarter(today() - 15)
+rc_quarter <- identify_quarter(ymd("2020-10-30") - 15) # erase
 
 rc_quarter_number <- as.double(str_extract(rc_quarter, "[1-4]"))
 
@@ -74,14 +91,14 @@ year_term_id <- year_table$id
 
 year_first_day <- year_table$firstday
 
-calculated_type <- case_when(
-  today() - 5 <= ymd(rc_quarter_last_day) ~ "first_upload",
-  # if it's less than 5 days after the quarter ended:
-  # designation is first_upload
-  # will eventually use to decide whether or not to include DL students in normal GPA and final grade calculation
-  TRUE ~ "not_first_upload" # if not designation is not_first_upload,
-  # will eventually use to decide whether or not to run seperate script for DL vs gen ed
-)
+# calculated_type <- case_when(
+#   today() - 5 <= ymd(rc_quarter_last_day) ~ "first_upload",
+#   # if it's less than 5 days after the quarter ended:
+#   # designation is first_upload
+#   # will eventually use to decide whether or not to include DL students in normal GPA and final grade calculation
+#   TRUE ~ "not_first_upload" # if not designation is not_first_upload,
+#   # will eventually use to decide whether or not to run seperate script for DL vs gen ed
+# )
 
 # MAP term names - Current Year
 termname_map_winter <- paste0("Winter ", current_first_year, "-", current_last_year)
@@ -96,21 +113,6 @@ termname_map_last_spring <- paste0("Spring ", current_first_year - 1, "-", curre
 termname_map_last_spring <- paste0("Spring ", current_first_year - 1, "-", current_last_year - 1)
 
 #-------------------------- ### Attendance Tables ###------------------------------------
-
-# School table
-schools <- tibble(
-  schoolid = c(
-    78102, 7810, 400146, 4001462, 400163,
-    4001802, 400180, 4001632
-  ),
-  schoolname = c(
-    "Ascend Primary", "Ascend Middle", "Academy Chicago",
-    "Academy Chicago Primary", "Bloom", "One Primary",
-    "One Academy", "Bloom Primary"
-  ),
-  schoolabbreviation = c("KAP", "KAMS", "KAC", "KACP", "KBCP", "KOP", "KOA", "KBP")
-)
-
 
 # Get students
 
