@@ -94,6 +94,8 @@ dl_upload <- quarter_grades %>%
   ungroup() %>%
   select(-c(incomplete_GradeBook, 
             subject)) %>%
+  
+  # only retain columns required for upload (anything else and the upload will fail)
   select(`Student ID`, Percentage, Mark, GradeBook, site_id)
 
 dl_upload_kac <- dl_upload %>%

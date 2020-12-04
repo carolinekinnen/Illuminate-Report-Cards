@@ -1,12 +1,12 @@
 
 # ----------------------- ### Identify Quarter Function ### -----------------
 
-identify_quarter <- function(date) {
+identify_quarter <- function(date, terms_table) {
   case_when(
-    date >= terms$firstday[1] & date < terms$lastday[3] ~ "Q1",
-    date >= terms$firstday[10] & date < terms$lastday[5] ~ "Q2",
-    date >= terms$firstday[4] & date < terms$lastday[6] ~ "Q3",
-    date >= terms$firstday[12] & date <= terms$lastday[12] ~ "Q4",
+    date >= terms_table$firstday[1] & date < terms_table$lastday[3] ~ "Q1",
+    date >= terms_table$firstday[10] & date < terms_table$lastday[5] ~ "Q2",
+    date >= terms_table$firstday[4] & date < terms_table$lastday[6] ~ "Q3",
+    date >= terms_table$firstday[12] & date <= terms_table$lastday[12] ~ "Q4",
     TRUE ~ "not in SY")
 }
 

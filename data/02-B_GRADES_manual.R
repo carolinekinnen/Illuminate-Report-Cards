@@ -1,16 +1,4 @@
 
-# Identification ----------------------------------------------------------
-
-bq_project <- Sys.getenv("BQ_PROJECT")
-bq_auth_file <- Sys.getenv("BQ_AUTH_FILE")
-
-bigrquery::bq_auth(path = bq_auth_file)
-Sys.getenv("BQ_AUTH_FILE")
-
-googleAuthR::gar_auth_service("/usr/local/etc/gcs/kipp-chicago-silo-2-3789ce3e3415.json")
-gcs_global_bucket("idea_remote_attendance_dashboard")
-
-
 #---------------------- #### Tables Created by Hand ### -----------------------
 
 # School table
@@ -95,20 +83,6 @@ grade_percent_scale <- tibble(
 ) %>%
   arrange(desc(percent))
 
-
-# # CPS School ID & Home RCDTS
-# school_id_table <-
-#   tribble(
-#     ~schoolid, ~abbr, ~cps_school_id,
-#     "78102", "KAP", "400044",
-#     "7810", "KAMS", "400044",
-#     "400146", "KAC", "400146",
-#     "4001462", "KACP", "400146",
-#     "4001632", "KBP", "400163",
-#     "400163", "KBCP", "400163",
-#     "4001802", "KOP", "400180",
-#     "400180", "KOA", "400180",
-#   )
 
 users_names <- users %>%
   mutate(teacher_full_name = str_c(first_name, last_name, sep = " ")) %>%

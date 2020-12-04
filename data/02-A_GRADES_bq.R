@@ -27,23 +27,26 @@ schools <- tibble(
   schoolabbreviation = c("KAP", "KAMS", "KAC", "KACP", "KBCP", "KOP", "KOA", "KBP")
 )
 
-#-------------------------- ### Parameters ### ----------------------------------------
+
+# Parameters --------------------------------------------------------------
+
+CURRENT_QUARTER_DATE = lubridate::ymd("2020-10-02")
 
 # find School Year and Term ID to filter large attendance tables
-sy <- calc_academic_year(today(), format = "firstyear")
+SY <- calc_academic_year(CURRENT_QUARTER_DATE, format = "firstyear")
 
-current_first_year <- calc_academic_year(lubridate::ymd("2020-10-30"), # erase
+CURRENT_FIRST_YEAR <- calc_academic_year(CURRENT_QUARTER_DATE,
   format = "first_year"
 )
 
-current_last_year <- calc_academic_year(today(),
+CURRENT_LAST_YEAR <- calc_academic_year(CURRENT_QUARTER_DATE,
   format = "second_year"
 )
 
-ps_termid <- calc_ps_termid(current_first_year)
+PS_TERMID <- calc_ps_termid(SY)
 
-terms <- get_powerschool("terms") %>%
-  filter(id >= ps_termid) %>%
+TERMS <- get_powerschool("terms") %>%
+  filter(id >= PS_TERMID) %>%
   select(
     id,
     abbreviation,
@@ -54,63 +57,28 @@ terms <- get_powerschool("terms") %>%
   unique() %>%
   arrange(id)
 
-sy_abbreviation <- terms$abbreviation[1]
-
-terms_last_year <- get_powerschool("terms") %>%
-  filter(id == ps_termid - 100) %>%
-  select(
-    id,
-    abbreviation,
-    firstday,
-    lastday
-  ) %>%
-  collect() %>%
-  unique() %>%
-  arrange(id)
-
-sy_abbreviation_last_year <- terms_last_year$abbreviation[1]
+SY_ABBREVIATION <- TERMS$abbreviation[1]
 
 # Last day of quarter in which report cards are being generated
-rc_quarter_table <- terms %>%
-  filter(abbreviation == identify_quarter(ymd("2020-10-30") - 15)) %>% # erase
+RC_QUARTER_TABLE <- TERMS %>%
+  filter(abbreviation == identify_quarter(CURRENT_QUARTER_DATE, TERMS)) %>% 
   select(lastday, firstday) %>%
   unique()
 
-rc_quarter_first_day <- rc_quarter_table$firstday[1]
+RC_QUARTER_FIRST_DAY <- RC_QUARTER_TABLE$firstday[1]
 
-rc_quarter_last_day <- rc_quarter_table$lastday[1]
+RC_QUARTER_LAST_DAY <- RC_QUARTER_TABLE$lastday[1]
 
-rc_quarter <- identify_quarter(ymd("2020-10-30") - 15) # erase
+RC_QUARTER <- identify_quarter(CURRENT_QUARTER_DATE, TERMS)
 
-rc_quarter_number <- as.double(str_extract(rc_quarter, "[1-4]"))
+RC_QUARTER_NUMBER <- as.double(str_extract(RC_QUARTER, "[1-4]"))
 
-year_table <- terms %>%
-  filter(id == ps_termid)
+YEAR_TABLE <- TERMS %>%
+  filter(id == PS_TERMID)
 
-year_term_id <- year_table$id
+YEAR_TERM_ID <- YEAR_TABLE$id
 
-year_first_day <- year_table$firstday
-
-# calculated_type <- case_when(
-#   today() - 5 <= ymd(rc_quarter_last_day) ~ "first_upload",
-#   # if it's less than 5 days after the quarter ended:
-#   # designation is first_upload
-#   # will eventually use to decide whether or not to include DL students in normal GPA and final grade calculation
-#   TRUE ~ "not_first_upload" # if not designation is not_first_upload,
-#   # will eventually use to decide whether or not to run seperate script for DL vs gen ed
-# )
-
-# MAP term names - Current Year
-termname_map_winter <- paste0("Winter ", current_first_year, "-", current_last_year)
-termname_map_spring <- paste0("Spring ", current_first_year, "-", current_last_year)
-
-# MAP term names - Last Year
-# used in KTC_data
-
-termname_map_last_spring <- paste0("Spring ", current_first_year - 1, "-", current_last_year - 1)
-
-
-termname_map_last_spring <- paste0("Spring ", current_first_year - 1, "-", current_last_year - 1)
+YEAR_FIRST_DAY <- YEAR_TABLE$firstday
 
 #-------------------------- ### Attendance Tables ###------------------------------------
 
@@ -189,8 +157,6 @@ membership_remote <-
     schoolid
   ))
 
-
-
 students_ktc <- get_powerschool("students") %>%
   select(schoolid,
     student_id = student_number,
@@ -209,8 +175,8 @@ students_ktc <- get_powerschool("students") %>%
 
 # Get attendance
 attendance <- get_powerschool("attendance") %>%
-  filter(att_date >= lubridate::ymd(year_first_day)) %>%
-  filter(att_date <= lubridate::ymd(rc_quarter_last_day)) %>%
+  filter(att_date >= lubridate::ymd(YEAR_FIRST_DAY)) %>%
+  filter(att_date <= lubridate::ymd(RC_QUARTER_LAST_DAY)) %>%
   filter(att_mode_code == "ATT_ModeDaily") %>%
   collect()
 
@@ -221,7 +187,7 @@ attendance_code <- get_powerschool("attendance_code") %>%
 
 # Get membership table
 membership <- silounloadr::get_powerschool("ps_membership_reg") %>%
-  filter(yearid >= ps_termid / 100) %>%
+  filter(yearid >= PS_TERMID / 100) %>%
   select(studentid,
     schoolid,
     date = calendardate,
@@ -234,7 +200,7 @@ membership <- silounloadr::get_powerschool("ps_membership_reg") %>%
 #-------------------------- ### Enrollment ###----------------------------------------
 
 enrollment <- get_powerschool("ps_enrollment_all") %>%
-  filter(exitdate >= rc_quarter_last_day) %>%
+  filter(exitdate >= RC_QUARTER_LAST_DAY) %>%
   collect()
 
 student_enroll <- enrollment %>%
@@ -301,8 +267,8 @@ pgfinalgrades <- get_powerschool("pgfinalgrades",
 # Quarter grades for K-2 students
 q_grades_primary <- get_illuminate("overall_score_cache", schema = "gradebook") %>%
   filter(
-    timeframe_start_date >= rc_quarter_first_day,
-    timeframe_end_date <= rc_quarter_last_day
+    timeframe_start_date >= RC_QUARTER_FIRST_DAY,
+    timeframe_end_date <= RC_QUARTER_LAST_DAY
   ) %>%
   select(
     gradebook_id,
@@ -352,7 +318,7 @@ students_primary <- get_powerschool("students") %>%
 
 # get gradebooks
 gradebooks <- get_illuminate("gradebooks", schema = "gradebook") %>%
-  filter(academic_year == current_last_year) %>%
+  filter(academic_year == CURRENT_LAST_YEAR) %>%
   select(
     gradebook_id,
     created_by,

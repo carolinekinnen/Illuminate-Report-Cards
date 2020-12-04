@@ -47,6 +47,16 @@ dl_gradebook <-
                       "20-21_dl_roster_gb_name.csv"))
 
 
+
+# Illuminate Report Card Data - NEW SOURCE --------------------------------
+
+kc_grades_full <- 
+  read_csv(here::here("data", 
+                      "flatfiles", 
+                      "raw_grade_export_illuminate",
+                      "2021_q1_kipp_chicago_student_grades.csv"))
+
+
 # Temporary fix for courses file ------------------------------------------
 
 # this file should be pulled from bq

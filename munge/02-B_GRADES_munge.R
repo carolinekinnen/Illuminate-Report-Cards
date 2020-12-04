@@ -37,8 +37,8 @@ final_percent_grades <- final_grades %>%
   mutate(
     grade_ela = if_else(grade_ela == grade_ela_mod | is.na(grade_ela_mod), grade_ela, grade_ela_mod),
     grade_math = if_else(grade_math == grade_math_mod | is.na(grade_math_mod), grade_math, grade_math_mod),
-    `grade_lit centers` = if_else(`grade_lit centers` == `grade_lit centers_mod` | is.na(`grade_lit centers_mod`),
-      `grade_lit centers`, `grade_lit centers_mod`),
+    # `grade_lit centers` = if_else(`grade_lit centers` == `grade_lit centers_mod` | is.na(`grade_lit centers_mod`),
+    #   `grade_lit centers`, `grade_lit centers_mod`),
     grade_science = if_else(grade_science == grade_science_mod | is.na(grade_science_mod), grade_science, grade_science_mod),
     grade_social_studies = if_else(grade_social_studies == grade_social_mod | is.na(grade_social_mod),
       grade_social_studies, grade_social_mod
