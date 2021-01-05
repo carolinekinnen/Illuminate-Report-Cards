@@ -1,0 +1,20 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+library(jsonlite)
+cc <- fromJSON("current_cc_data.json") %>% as.data.frame() %>%
+  select(course_number, section_number, teacherid, termid, schoolid, studentid, dateleft, sectionid) %>%
+  filter(termid == "3000")
+```
+
+```{r}
+write.csv(cc, "cc.csv")
+```
+
