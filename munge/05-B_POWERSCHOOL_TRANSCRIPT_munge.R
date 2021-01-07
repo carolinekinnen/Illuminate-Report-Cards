@@ -18,8 +18,7 @@ ps_upload_quarter <- quarter_grades %>%
          earnedcrhrs = 1.00,
          potentialcrhrs = 1.00,
          gpa_addedvalue = 0,
-         gradescale_name = "default",
-         termid = year_term_id) %>%
+         gradescale_name = "default") %>%
   filter(!is.na(Course_Name)) %>%
   mutate(schoolname = case_when(
     course_school == "KBCP" ~ "KIPP Bloom College Prep",
@@ -41,8 +40,7 @@ ps_upload_percentage <- final_percents %>%
          earnedcrhrs = 1.00,
          potentialcrhrs = 1.00,
          gpa_addedvalue = 0,
-         gradescale_name = "default",
-         termid = year_term_id) %>%
+         gradescale_name = "default") %>%
   filter(!is.na(Course_Name)) %>%
   mutate(schoolname = case_when(
     course_school == "KBCP" ~ "KIPP Bloom College Prep",
@@ -51,6 +49,7 @@ ps_upload_percentage <- final_percents %>%
 
 # Final Letter Grade
 ps_upload_letter_grade <- final_grades %>% #final_grades %>%
+  ungroup(site_id) %>%
   select(student_number = student_id,
          grade, 
          subject)
@@ -66,16 +65,20 @@ ps_upload_final <- ps_upload_percentage %>%
     schoolname == "KIPP Ascend Middle" ~ "KIPP Ascend Middle School",
     TRUE ~ schoolname
   )) %>%
-  filter(store_code == STORE_CODE)
+  filter(store_code == STORE_CODE) %>%
+  mutate(subject = if_else(subject == "lit centers", "lit_centers", subject)) %>%
+  rename(grade_org = grade, 
+         percent_org = percent) %>%
+  left_join(
+    final_percent_grades %>% ungroup(site_id) %>% select(-c(site_id, store_code)), 
+    by = c("student_number" = "student_id", 
+           "subject")
+  ) %>%
+  select(-c(grade_org, percent_org)) %>%
+  mutate(percent = str_remove(percent, "%"))
+  
 
 # fix student grades
-
-ps_upload_final_edited <- 
-  ps_upload_final %>%
-    mutate(grade = case_when(
-      student_number == 50342191 & subject == "science" ~ "B",
-      student_number == 50308261 & subject == "science" ~ "B",
-      TRUE ~ grade))
   
 
 # fix science for DL students

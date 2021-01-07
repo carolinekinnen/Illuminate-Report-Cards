@@ -30,7 +30,7 @@ schools <- tibble(
 
 # Parameters --------------------------------------------------------------
 
-CURRENT_QUARTER_DATE = lubridate::ymd("2020-10-02")
+CURRENT_QUARTER_DATE = lubridate::today()
 
 # find School Year and Term ID to filter large attendance tables
 SY <- calc_academic_year(CURRENT_QUARTER_DATE, format = "firstyear")
@@ -369,3 +369,19 @@ illuminate_teacher_sec <- get_illuminate("section_teacher_aff",
     primary_teacher
   ) %>%
   collect()
+
+cc <- read_csv(here::here("data", "flatfiles", "cc.csv"))
+
+# Get CC table
+# cc <- get_powerschool("cc") %>%
+#   select(
+#     course_number,
+#     section_number,
+#     teacherid,
+#     termid,
+#     schoolid,
+#     studentid,
+#     dateleft,
+#     sectionid
+#   ) %>%
+#   collect()

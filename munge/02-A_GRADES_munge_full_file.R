@@ -1,6 +1,11 @@
 # Grades Munge
 # cleaning and transforming files from Illuminate for Illuminate, Deans List, and Powerschool
 
+
+# CONSTANTS ---------------------------------------------------------------
+
+CURRENT_QUARTER_NUMBER <- "Q2"
+
 # Course Names for Grades 4-8 ---------------------------------------------
 
 course_names_teachers <- users_names %>%
@@ -38,7 +43,6 @@ course_names_teachers <- users_names %>%
   ) %>%
   filter(
     !grepl("Attendance|ELL", course_long_name),
-    grade_level > 2
   ) %>%
   mutate(
     course_long_name = gsub("ELA", "English Language Arts", course_long_name),
@@ -73,7 +77,7 @@ student_schools <- students_powerschool_transcripts %>%
     student_id
   ) %>%
   left_join(schools,
-            by = c("ps_schoolid" = "schoolid")
+    by = c("ps_schoolid" = "schoolid")
   )
 
 course_names <- course_names_teachers %>%
@@ -101,9 +105,35 @@ course_names <- course_names_teachers %>%
 
 # Current Quarter Report Card Data for Powerschool and Deans List  --------
 
-rc_letter_grades <-
-  kc_grades_full %>%
+current_quarter_grades <-
+  kc_grades_distinct %>%
+  
+  # START
+  #  ___ _ __ __ _ ___  ___
+  # / _ \ '__/ _` / __|/ _ \
+  # |  __/ | | (_| \__ \  __/
+  #  \___|_|  \__,_|___/\___|
+ 
+  # Filter out attendance. We do not put a grade in for attendance
+  filter(!grepl("Attendance", `Course Name`)) %>%
+  
+  # END
+  #  ___ _ __ __ _ ___  ___
+  # / _ \ '__/ _` / __|/ _ \
+  # |  __/ | | (_| \__ \  __/
+  #  \___|_|  \__,_|___/\___|
   drop_na("Mark") %>%
+  mutate(
+    Percentage = as.character(Percentage),
+    Percentage = trimws(Percentage, which = "both")
+  ) %>%
+  
+  # START
+  #  ___ _ __ __ _ ___  ___
+  # / _ \ '__/ _` / __|/ _ \
+  # |  __/ | | (_| \__ \  __/
+  #  \___|_|  \__,_|___/\___|
+  
   mutate(
     `Course ID` =
       case_when(
@@ -115,152 +145,72 @@ rc_letter_grades <-
       TRUE ~ `Course Name`
     )
   ) %>%
-
-  # Teacher column makes data duplicate grades. Erase teacher column
-  # and call distinct
-
-  select(-c(Teacher)) %>%
-  distinct() %>%
+  
+  # END
+  #  ___ _ __ __ _ ___  ___
+  # / _ \ '__/ _` / __|/ _ \
+  # |  __/ | | (_| \__ \  __/
+  #  \___|_|  \__,_|___/\___|
+  
   left_join(student_schools,
     by = c("Student ID" = "student_id")
   ) %>%
-  select(-c(ps_schoolid, schoolname, schoolabbreviation))
+  select(-c(ps_schoolid, schoolname, schoolabbreviation)) %>%
+  mutate(Mark = as.character(Mark)) %>%
+  
+  # Add grades w. pluses and minus
+  left_join(grade_percent_scale,
+    by = c("Percentage" = "percent")
+  ) %>%
 
-# rc_letter_grades <- grade_df_df[[2]]%>% # grade_df_list %>%
-#   map_df(
-#     .f = get_q_grades_pct,
-#     grade_type = "grade",
-#     rc_quarter_input = RC_QUARTER
-#   ) %>%
-#   left_join(student_schools,
-#     by = "student_id"
-#   ) %>%
-#   # filter(course_school == schoolabbreviation) %>%
-#   select(-c(ps_schoolid, schoolname, schoolabbreviation))
-# 
-# rc_percent <- grade_df_df[[2]] %>% # grade_df_list %>%
-#   map_df(
-#     .f = get_q_grades_pct,
-#     grade_type = "percent",
-#     rc_quarter_input = RC_QUARTER
-#   ) %>%
-#   left_join(student_schools,
-#     by = "student_id"
-#   ) %>%
-#   filter(course_school == schoolabbreviation) %>%
-#   select(-c(ps_schoolid, schoolname, schoolabbreviation))
-
-quarter_grades <- rc_letter_grades %>%
+  # Remove Mark (which has no + or -)
+  select(-Mark) %>%
+  mutate(Percentage = as.numeric(Percentage)) %>%
+  
   left_join(course_names_teachers %>% rename(
     student_id = student_number,
     course_school = schoolabbreviation,
     site_id = schoolid
-  ) %>% filter(!str_detect(subject, "3rd")) %>%
+  ) %>%
     select(-grade_level),
   by = c(
-    "Student ID" =  "student_id",
+    "Student ID" = "student_id",
     "Course ID" = "course_number"
   )
   ) %>%
-  # not working with courses, can't remember where this was used
-  mutate(Percentage = as.double(gsub("%", "", Percentage))) %>%
   left_join(students %>%
-    select(student_id = student_number, first_name, last_name, grade_level),
-  by = c("Student ID" = "student_id")
+    select(`Student ID` = student_number, first_name, last_name, grade_level),
+  by = "Student ID"
   ) %>%
+  mutate(quarter = CURRENT_QUARTER_NUMBER) %>%
+
+  # We only calculate grades for 4th grade and up
   filter(grade_level > 3) %>%
-  filter(!str_detect(`Course Name`, "Attendance")) %>%
-  select(-c(`Section ID`, `Grading Period`)) %>%
-  mutate(`Score Last Updated` = lubridate::mdy(`Score Last Updated`)) %>%
-  distinct() %>% 
-  arrange(`Student ID`) %>%
-  drop_na("subject") %>%
   select(
-    "Student ID",  
-    "Last Name",       
-    "First Name",        
-    "GradeBook",       
-    "Percentage",        
-    "Mark",       
-    "Course ID",         
-    "Course Name",       
-    "site_id",        
-    "course_long_name",  
-    "teacher_full_name", 
-    "subject",           
-    "course_school",
-    "grade_level" 
-  )
-
-
-quarter_grades_pivot_wide <- quarter_grades %>%
+    site_id,
+    school_abbr = course_school,
+    `Student ID`,
+    last_name,
+    first_name,
+    grade_level,
+    studentid,
+    course_long_name,
+    subject,
+    `Course ID`,
+    grade,
+    percentage = Percentage,
+    home_room,
+    teacher_full_name,
+    GradeBook,
+    `Grading Period`,
+    quarter,
+    `Score Last Updated`
+  ) %>%
+  mutate(grade = if_else(percentage > 100, "A+", grade)) %>%
   distinct() %>%
-  select(
-    student_id = "Student ID",
-    subject,
-    grade = Mark,
-    percent = Percentage
-  ) %>%
-  group_by(
-    subject,
-    student_id,
-  ) %>%
-  # mutate(row = row_number()) %>%
-  pivot_wider(
-    names_from = subject,
-    values_from = c(grade, percent)
-  ) %>%
-  unnest(cols = c(
-    contains("grade"), 
-    contains("percent")
-  ))
+  arrange(`Student ID`) %>%
+  group_by(`Student ID`, subject)
 
-# 
-# 
-# # Year Average Percentage for Powerschool and Illuminate ------------------
-# 
-# # Run all quarters seperately then bind rows because setting rc_quarter_input = c("Q1", "Q2", "Q3", "Q4") was dropping subjects
-# 
-# quarter_1_final <- grade_df_df[[2]] %>% # grade_df_list %>%
-#   map_df(
-#     .f = get_q_grades_pct,
-#     grade_type = "percent",
-#     rc_quarter_input = c("Q1")
-#   )
-# 
-# quarter_2_final <- grade_df_df[[2]] %>% # grade_df_list %>%
-#   map_df(
-#     .f = get_q_grades_pct,
-#     grade_type = "percent",
-#     rc_quarter_input = c("Q2")
-#   )
-# 
-# # commented out because school closure, quarter 4 has both Q3 and Q3
-# 
-# # quarter_3_final <- grade_df_df[[2]] %>% #grade_df_list %>%
-# # map_df(.f = get_q_grades_pct,
-# #        grade_type = "percent",
-# #        rc_quarter_input = c("Q3"))
-# 
-# quarter_4_final <- grade_df_df[[2]] %>% # grade_df_list %>%
-#   map_df(
-#     .f = get_q_grades_pct,
-#     grade_type = "percent",
-#     rc_quarter_input = c("Q4")
-#   )
-# 
-# all_quarter_percents <- quarter_1_final %>%
-#   bind_rows(
-#     quarter_2_final, # quarter_3_final,
-#     quarter_4_final
-#   ) %>%
-#   mutate(percent = as.double(str_extract(percent, "[[:digit:]]+")))
-# 
-# final_percents <- all_quarter_percents %>%
-#   dplyr::group_by(site_id, student_id, subject, store_code) %>%
-#   summarize(percent = mean(percent)) %>%
-#   mutate(percent = round(percent, 0)) %>%
-#   mutate(subject = case_when(
-#     subject == "social" ~ "social_studies",
-#     TRUE ~ subject
-#   ))
+# %>%
+#   slice(which.max(lubridate::ymd(`Score Last Updated`)))
+  

@@ -81,7 +81,9 @@ grade_percent_scale <- tibble(
     seq(0, 59.9, .1)
   )
 ) %>%
-  arrange(desc(percent))
+  arrange(desc(percent)) %>%
+  mutate(percent = as.character(percent),
+         percent = trimws(percent, which = "both"))
 
 
 users_names <- users %>%

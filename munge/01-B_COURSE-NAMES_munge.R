@@ -1,11 +1,23 @@
 
+sy <- calc_academic_year(today(), format = "firstyear")
+
+current_first_year <- calc_academic_year(lubridate::today(),
+                                         format = "first_year"
+)
+
+current_last_year <- calc_academic_year(today(),
+                                        format = "second_year"
+)
+
+PS_TERMID <- calc_ps_termid(current_first_year)
+
 # --------------------- ### Courses and Teachers - Middle ###--------------------------
 
 teacher_subject <- course_names_teachers %>%
   mutate(subject_teacher = sprintf("%s_teacher", subject)) %>%
   select(-c(course_number, subject, course_long_name)) %>%
   group_by(subject_teacher, schoolid, studentid, student_number, grade_level, home_room) %>%
-  mutate(row = row_number()) %>%
+  dplyr::mutate(row = row_number()) %>%
   # group_by(schoolid, studentid, student_number, home_room, grade_level, student_first, student_last) %>%
   pivot_wider(
     id_cols = c(row, schoolid, studentid, student_number, grade_level, home_room),
@@ -23,7 +35,14 @@ course_subject <- course_names_teachers %>%
     id_cols = c(row, schoolid, studentid, student_number, grade_level, home_room),
     names_from = subject_course, values_from = course_long_name
   ) %>%
-  select(-row)
+  select(-row) %>%
+  rename(`English Language Arts_course` = ela_course,
+         `Literacy Centers_course` = `lit centers_course`,
+         Science_course = science_course,
+         `Social Studies_course` = social_course,
+         `Physical Education_course` = pe_course,
+         Explorations_course = explorations_course
+         )
 
 course_names_teachers_final <- course_subject %>%
   left_join(teacher_subject,
@@ -36,7 +55,6 @@ course_names_teachers_final <- course_subject %>%
   ) %>%
   select(-home_room.y) %>%
   dplyr::rename(home_room = home_room.x) %>%
-  janitor::clean_names() %>%
   mutate(
     prealgebra_spanish = if_else(is.na(`pre_algebra_course`), `pre_algebra_course`, "Pre-álgebra"),
     math_spanish = if_else(is.na(`math_course`), `math_course`, "Matemáticas"),
@@ -56,21 +74,21 @@ course_names_teachers_final <- course_subject %>%
   )) %>%
   dplyr::rename(
     ELA = `English Language Arts_course`,
-    `ELA Teacher` = `English Language Arts_teacher`,
-    Math = `Mathematics_course`,
-    `Math Teacher` = `Mathematics_teacher`,
+    `ELA Teacher` = `ela_teacher`,
+    Math = `math_course`,
+    `Math Teacher` = `math_teacher`,
     Science = `Science_course`,
-    # Science_teacher = `Science Teacher`,
+    Science_teacher = `science_teacher`,
     # Art = Art_course,
     # `Art Teacher` = Art_teacher,
     PE = `Physical Education_course`,
-    `PE Teacher` = `Physical Education_teacher`,
+    `PE Teacher` = `Physical Education_course`,
     `Social Studies` = `Social Studies_course`,
-    `Social Studies Teacher` = `Social Studies_teacher`,
+    `Social Studies Teacher` = `social_teacher`,
     # Dance = `Dance_course`,
     # `Dance Teacher` = `Dance_teacher`,
     `Literacy Centers` = `Literacy Centers_course`,
-    `Literacy Centers Teacher` = `Literacy Centers_teacher`,
+    `Literacy Centers Teacher` = `lit centers_teacher`,
     `Algebra Spanish` = algebra_spanish,
     `Math Spanish` = math_spanish,
     `Pre Algebra Spanish` = prealgebra_spanish
@@ -104,7 +122,9 @@ primary_course_teacher <- users_names %>%
   left_join(cc,
     by = "teacherid"
   ) %>%
-  filter(termid == ps_termid) %>% # joins users/teachers and cc
+  filter(termid == PS_TERMID) %>% 
+  
+  # joins users/teachers and cc
   left_join(courses,
     by = "course_number"
   ) %>% # joins users/teachers/cc and courses
@@ -118,7 +138,9 @@ primary_course_teacher <- users_names %>%
     course_number,
     section_number
   )) %>%
-  left_join(students %>% # joins users/teachers/cc/courses and students
+  
+  # joins users/teachers/cc/courses and students
+  left_join(students %>% 
     select(student_number,
       studentid = id,
       grade_level,

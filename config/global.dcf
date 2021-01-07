@@ -14,7 +14,7 @@ libraries: reshape2, plyr,
     googlesheets4, openxlsx,
     googledrive, fuzzyjoin,
     googleCloudStorageR, toOrdinal, 
-    data.table, mltools
+    data.table, mltools, dplyr
 as_factors: FALSE
 tables_type: tibble
 attach_internal_libraries: FALSE
