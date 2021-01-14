@@ -7,10 +7,6 @@ bq_auth_file <- Sys.getenv("BQ_AUTH_FILE")
 bigrquery::bq_auth(path = bq_auth_file)
 Sys.getenv("BQ_AUTH_FILE")
 
-googleAuthR::gar_auth_service("/usr/local/etc/gcs/kipp-chicago-silo-2-3789ce3e3415.json")
-gcs_global_bucket("idea_remote_attendance_dashboard")
-
-
 # SINGLE MANUAL TABLE -----------------------------------------------------
 
 # School table

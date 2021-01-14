@@ -1,5 +1,6 @@
-# 3. --------------------- ### Write Grade File for Illuminate  ### ------------------
-# Write after gradebooks are finalized
+
+
+# Write Illuminate Grade File ---------------------------------------------
 
 final_grades_file <- sprintf(paste0("output/",
                                     sy_abbreviation,

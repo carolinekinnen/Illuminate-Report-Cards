@@ -1,7 +1,15 @@
 
-# Pull tables from BigQuery database
+# Identification ----------------------------------------------------------
 
-# Pull tables from BigQuery database
+bq_project <- Sys.getenv("BQ_PROJECT")
+bq_auth_file <- Sys.getenv("BQ_AUTH_FILE")
+
+bigrquery::bq_auth(path = bq_auth_file)
+Sys.getenv("BQ_AUTH_FILE")
+
+googleAuthR::gar_auth_service("/usr/local/etc/gcs/kipp-chicago-silo-2-3789ce3e3415.json")
+gcs_global_bucket("idea_remote_attendance_dashboard")
+
 #-------------------------- ### Parameters ### ----------------------------------------
 
 # find School Year and Term ID to filter large attendance tables
@@ -51,17 +59,6 @@ year_table <- terms %>%
 year_term_id <- year_table$id
 
 year_first_day <- year_table$firstday
-
-# Identification ----------------------------------------------------------
-
-bq_project <- Sys.getenv("BQ_PROJECT")
-bq_auth_file <- Sys.getenv("BQ_AUTH_FILE")
-
-bigrquery::bq_auth(path = bq_auth_file)
-Sys.getenv("BQ_AUTH_FILE")
-
-googleAuthR::gar_auth_service("/usr/local/etc/gcs/kipp-chicago-silo-2-3789ce3e3415.json")
-gcs_global_bucket("idea_remote_attendance_dashboard")
 
 # PARAMETERS --------------------------------------------------------------
 
