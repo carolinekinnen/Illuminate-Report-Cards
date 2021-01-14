@@ -8,7 +8,7 @@ final_grades_file <- sprintf(paste0("output/",
                                     rc_quarter,  
                                     " RC Final Grades %s.csv"), lubridate::today())
 
-write.csv(final_grades_gpa_illuminate_upload %>%
+write.csv(final_grades_gpa_illuminate_upload_4_8 %>%
             as.data.frame(),
           file = here::here(final_grades_file),
           row.names = FALSE)

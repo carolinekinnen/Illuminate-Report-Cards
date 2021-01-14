@@ -84,7 +84,7 @@ cumulative_course_grade_point <-
 
 # Final Illuminate Upload -------------------------------------------------
 
-final_grades_gpa_illuminate_upload <- cumulative_grade_file %>%
+final_grades_gpa_illuminate_upload_4_8 <- cumulative_grade_file %>%
   select(-points) %>%
   filter(quarter == CURRENT_QUARTER) %>%
   mutate(percent = paste0(as.character(round2(percentage)), "%")) %>%
