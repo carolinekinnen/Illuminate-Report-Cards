@@ -1,6 +1,13 @@
 
 # Parameters --------------------------------------------------------------
 
+Q1 <- "Q1"
+Q2 <- "Q2"
+Q3 <- "Q3"
+Q4 <- "Q4"
+
+CURRENT_QUARTER <- Q2
+
 SY_2021 <- silounloadr::calc_academic_year(ymd("2020-08-24"), format = "firstyear")
 
 # Output: 2020
@@ -34,18 +41,49 @@ terms <- get_powerschool("terms") %>%
   unique() %>%
   arrange(id)
 
-rc_quarter_table <- terms %>%
-  filter(abbreviation == identify_quarter(today() - 15)) %>%
+current_quarter_table_dates <- terms %>%
+  filter(abbreviation == CURRENT_QUARTER) %>%
   select(lastday, firstday) %>%
   unique()
 
-rc_quarter <- identify_quarter(today() - 15)
+q1_quarter_table_dates <- terms %>%
+  filter(abbreviation == Q1) %>%
+  select(lastday, firstday) %>%
+  unique()
 
-rc_quarter_first_day <- rc_quarter_table$firstday[1]
+q2_quarter_table_dates <- terms %>%
+  filter(abbreviation == Q2) %>%
+  select(lastday, firstday) %>%
+  unique()
 
-rc_quarter_last_day <- rc_quarter_table$lastday[1]
+q3_quarter_table_dates <- terms %>%
+  filter(abbreviation == Q3) %>%
+  select(lastday, firstday) %>%
+  unique()
 
-# Daily Attendance - Data Table Munging -----------------------------------
+q4_quarter_table_dates <- terms %>%
+  filter(abbreviation == Q4) %>%
+  select(lastday, firstday) %>%
+  unique()
+
+CURRENT_QUARTER_FIRST_DAY <- current_quarter_table_dates$firstday[1]
+CURRENT_QUARTER_LAST_DAY <- current_quarter_table_dates$lastday[1]
+
+Q1_FIRST_DAY <- q1_quarter_table_dates$firstday[1]
+Q1_LAST_DAY <- q1_quarter_table_dates$lastday[1]
+
+Q2_FIRST_DAY <- q2_quarter_table_dates$firstday[1]
+Q2_LAST_DAY <- q2_quarter_table_dates$lastday[1]
+
+Q3_FIRST_DAY <- q3_quarter_table_dates$firstday[1]
+Q3_LAST_DAY <- q3_quarter_table_dates$lastday[1]
+
+Q4_FIRST_DAY <- q4_quarter_table_dates$firstday[1]
+Q4_LAST_DAY <- q4_quarter_table_dates$lastday[1]
+
+
+
+# Student Daily Attendance ------------------------------------------------
 
 student_daily_attendance <-
 
@@ -53,7 +91,7 @@ student_daily_attendance <-
   attendance_remote %>%
 
   # filter to current school year
-  filter(behavior_date >= ymd("2020-08-24")) %>%
+  filter(behavior_date >= Q1_FIRST_DAY) %>%
   mutate(behavior = trimws(behavior, which = "both")) %>%
   left_join(students_remote %>%
     # set column types
@@ -67,7 +105,7 @@ student_daily_attendance <-
   # this table ensures that each student has a row for each day they were enrolled in school.
   # because attendance table only records "special circumstances", membership table is needed
   # to figure out all days students were present.
-  left_join(membership_remote %>% filter(date >= ymd("2020-08-24")),
+  left_join(membership_remote %>% filter(date >= Q1_FIRST_DAY),
     by = c(
       "studentid" = "studentid",
       "behavior_date" = "date"
@@ -114,64 +152,54 @@ student_daily_attendance <-
     membership,
     `attendance_Present (Remote)`,
     `attendance_Academic Contact`,
+    `attendance_Tardy (Remote)`,
+    `attendance_Present`,
     `attendance_Absent (Remote)`,
     `attendance_Absent (COVID related)`,
     `attendance_Absent`,
     `attendance_Did Not Arrive`,
-    attendance_Hospital
+    `attendance_Hospital`
   ) %>%
   distinct() %>%
-  mutate(membership = if_else(att_code == "D", 0, membership))
+  mutate(membership = if_else(att_code == "D", 0, membership), 
+         quarter = case_when(behavior_date <= Q1_LAST_DAY ~ "Q1", 
+                             behavior_date >= Q2_FIRST_DAY & behavior_date <= Q2_LAST_DAY ~ "Q2", 
+                             behavior_date >= Q3_FIRST_DAY & behavior_date <= Q3_LAST_DAY ~ "Q3", 
+                             behavior_date >= Q4_FIRST_DAY & behavior_date <= Q3_LAST_DAY ~ "Q4")
+         )
 
 
 
 #------------------------ ### Summarize Table ###-------------------------------------
 
-
-attend_school_grade_student <- student_daily_attendance %>%
-  filter(behavior_date <= rc_quarter_last_day) %>%
+attend_school_grade_student_totals <- student_daily_attendance %>%
+  filter(behavior_date <= CURRENT_QUARTER_LAST_DAY) %>%
   group_by(
     student_number,
     student_last_name,
     student_first_name,
     grade_level,
-    school_abbr
+    school_abbr, 
+    quarter
   ) %>%
   summarize(
-    `Days Enrolled (From First Day Present)` = sum(membership),
-    `Absences (Remote)` = sum(`attendance_Absent (Remote)`),
-    `Absences (Covid Related)` = sum(`attendance_Absent (COVID related)`),
-    `Absences (Total)` = (`Absences (Remote)` + `Absences (Covid Related)`),
-    `Present (Remote)` = sum(`attendance_Present (Remote)`),
-    `Academic Contact` = sum(`attendance_Academic Contact`),
-    `Present (Total)` = (`Present (Remote)` + `Academic Contact`),
-    ADA = round((`Present (Total)` / `Days Enrolled (From First Day Present)`) * 100, 2)
+    `Absences (Remote)` = sum(`attendance_Absent (Remote)`, na.rm = TRUE),
+    `Absences (Covid Related)` = sum(`attendance_Absent (COVID related)`, na.rm = TRUE),
+    `Absences` = sum(`attendance_Absent`, na.rm = TRUE),
+    `Present (Remote)` = sum(`attendance_Present (Remote)`, na.rm = TRUE),
+    `Academic Contact` = sum(`attendance_Academic Contact`, na.rm = TRUE),
+    `Present` = sum(`attendance_Present`, na.rm = TRUE),
+    total_tardy = sum(`attendance_Tardy (Remote)`, na.rm = TRUE),
+    total_present = (`Present (Remote)` + `Academic Contact` + total_tardy + `Present`),
+    total_absent = (`Absences (Remote)` + `Absences (Covid Related)` + `Absences`),
+    total_enrolled = sum(membership, na.rm = TRUE),
+    rate = paste0(round((total_present / total_enrolled) * 100, 1), "%"),
   ) %>%
-  rename(
-    enrolled = `Days Enrolled (From First Day Present)`,
-    present = `Present (Total)`,
-    absent = `Absences (Total)`
-  ) %>%
-  mutate(quarter = "Q1") %>%
+  filter(total_enrolled != 0) %>%
   select(
-    school_abbr, grade_level, student_number, student_first_name,
-    student_last_name, quarter, enrolled, present,
-    absent
-  )
-
-
-enrolled_quarter <- str_c("enrolled_", rc_quarter)
-
-# Pivot table so each attendance category and quarter is seperate row , calculate totals
-
-attend_school_grade_student_totals <- attend_school_grade_student %>%
-  pivot_wider(names_from = quarter, values_from = c(enrolled, present, absent)) %>%
-  ungroup() %>%
-  mutate(
-    total_absent = rowSums(.[grep("absent", names(.))], na.rm = TRUE),
-    total_present = rowSums(.[grep("present", names(.))], na.rm = TRUE),
-    total_enrolled = rowSums(.[grep("enrolled", names(.))], na.rm = TRUE),
-    tardy_Q1 = NA,
-    total_tardy = NA,
-    rate = paste0(round(total_present / total_enrolled * 100, 1), "%")
-  )
+    student_number, school_abbr, grade_level, student_last_name, student_first_name, 
+    quarter, total_tardy, total_absent, total_present, total_enrolled, rate
+  ) %>% 
+  pivot_wider(names_from = quarter, values_from = c(total_enrolled, total_present, total_tardy, total_absent, rate)) %>%
+  mutate(total_tardy_Q1 = NA) %>%
+  arrange(school_abbr, grade_level)

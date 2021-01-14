@@ -2,9 +2,8 @@
 # Write day after quarter ends
 
 att_file <- sprintf(paste0("output/",
-                           sy_abbreviation,
-                           " Files/attendance/",
-                           rc_quarter,  
+                           "20-21/attendance/",
+                           CURRENT_QUARTER,  
                            " RC Attendance %s.csv"), lubridate::today())
 
 write.csv(attend_school_grade_student_totals %>% 
