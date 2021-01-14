@@ -87,7 +87,7 @@ teachers <- get_powerschool("schoolstaff") %>%
 #   ) %>%
 #   collect()
 
-cc <- read_csv(here::here("data", "flatfiles", "cc.csv"))
+cc <- read_csv(here::here("data", "flatfiles", "cc_new.csv"))
 
 # Get courses table
 courses <- get_powerschool("courses") %>%

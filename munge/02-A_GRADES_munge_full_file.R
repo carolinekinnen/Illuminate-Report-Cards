@@ -6,6 +6,7 @@
 
 CURRENT_QUARTER_NUMBER <- "Q2"
 
+
 # Course Names for Grades 4-8 ---------------------------------------------
 
 course_names_teachers <- users_names %>%
@@ -206,11 +207,13 @@ current_quarter_grades <-
     quarter,
     `Score Last Updated`
   ) %>%
+  mutate(subject = if_else(subject == "social", "social_studies", subject)) %>%
   mutate(grade = if_else(percentage > 100, "A+", grade)) %>%
   distinct() %>%
   arrange(`Student ID`) %>%
-  group_by(`Student ID`, subject)
-
-# %>%
-#   slice(which.max(lubridate::ymd(`Score Last Updated`)))
+  mutate(`Score Last Updated` = lubridate::mdy(`Score Last Updated`)) %>%
+  group_by(`Student ID`, subject) %>%
+  slice(which.max(`Score Last Updated`)) %>%
+  ungroup(subject) %>%
+  distinct()
   

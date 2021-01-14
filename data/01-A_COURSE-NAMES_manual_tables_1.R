@@ -88,6 +88,7 @@ school_id_table <-
 attendance_code_full <-
   tribble(
     ~behavior, ~att_code, ~attendance,
+    "Tardy (Remote)", "Y", "Tardy (Remote)",
     "Absent (Remote)", "N", "Absent (Remote)",
     "Present (Remote)", "R", "Present (Remote)",
     '"A" Absent', "A", "Absent",

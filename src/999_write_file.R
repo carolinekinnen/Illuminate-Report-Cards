@@ -19,7 +19,7 @@ load.project()
 
 write.csv(quarter_number %>%
             as.data.frame(),
-          file = here::here("output/19-20 Files/quarter_numbers/quarter_numbers.csv"), 
+          file = here::here("output/20-21/quarter_numbers/quarter_numbers.csv"), 
           row.names = FALSE)
 
 

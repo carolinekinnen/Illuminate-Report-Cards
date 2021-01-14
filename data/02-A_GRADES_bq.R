@@ -115,8 +115,6 @@ students_remote <- get_powerschool("students") %>%
   collect(page_size = 2000) %>%
   mutate(home_room = trimws(home_room, which = "both"))
 
-
-
 attendance_remote <- get_deanslist("daily_attendance") %>%
   select(
     modified_attendance = `_modified`,
@@ -370,7 +368,7 @@ illuminate_teacher_sec <- get_illuminate("section_teacher_aff",
   ) %>%
   collect()
 
-cc <- read_csv(here::here("data", "flatfiles", "cc.csv"))
+cc <- read_csv(here::here("data", "flatfiles", "cc_new.csv"))
 
 # Get CC table
 # cc <- get_powerschool("cc") %>%

@@ -73,30 +73,45 @@ course_names_teachers_final <- course_subject %>%
     home_room == "4th Philander Smith College" ~ "Jacques Edwards"
   )) %>%
   dplyr::rename(
-    ELA = `English Language Arts_course`,
+    `ELA` = `English Language Arts_course`,
     `ELA Teacher` = `ela_teacher`,
-    Math = `math_course`,
-    `Math Teacher` = `math_teacher`,
-    Science = `Science_course`,
-    Science_teacher = `science_teacher`,
-    # Art = Art_course,
-    # `Art Teacher` = Art_teacher,
-    PE = `Physical Education_course`,
-    `PE Teacher` = `Physical Education_course`,
+    `ELA Spanish` = ela_spanish, 
+    
+    `Math` = math_course, 
+    `Math Teacher` = math_teacher, 
+    `Math Spanish` = math_spanish, 
+    
     `Social Studies` = `Social Studies_course`,
-    `Social Studies Teacher` = `social_teacher`,
-    # Dance = `Dance_course`,
-    # `Dance Teacher` = `Dance_teacher`,
+    `Social Studies Teacher` = social_teacher,
+    `Social Studies Spanish` = ss_spanish, 
+    
     `Literacy Centers` = `Literacy Centers_course`,
     `Literacy Centers Teacher` = `lit centers_teacher`,
-    `Algebra Spanish` = algebra_spanish,
-    `Math Spanish` = math_spanish,
-    `Pre Algebra Spanish` = prealgebra_spanish
+    `Literacy Centers Spanish` = `lit_center_spanish`,                
+    
+    `Science` = `Science_course`,    
+    `Science Teacher` = `science_teacher`,  
+    `Science Spanish` = `science_spanish`,                     
+    
+    `Mathmatics` = `mathematics centers_course`,  
+    `Mathmatics Teacher` = `mathematics centers_teacher`, 
+    
+    `Algebra` = `algebra_course`,    
+    `Algebra Teacher` = `algebra_teacher`, 
+    `Algebra Spanish` = `algebra_spanish`,                     
+    
+    `Pre Algebra` = `pre_algebra_course`, 
+    `Pre Algebra Teacher` = `pre_algebra_teacher`,  
+    `Pre Algebra Spanish` = `prealgebra_spanish`, 
+    
+    `PE` = `Physical Education_course`, 
+    `pe_teacher` = `pe_teacher`, 
+    `pe_spanish` = `pe_spanish` 
   ) %>%
   mutate(
-    ELA = case_when(
+    `ELA` = case_when(
       `ELA Teacher` == "Kayla Nuguid" ~ "ESL/English Language Arts",
-      TRUE ~ ELA
+      TRUE ~ `ELA`
     )
   )
 
